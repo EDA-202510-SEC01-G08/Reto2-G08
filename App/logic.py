@@ -6,6 +6,7 @@ from DataStructures.Queue import queue as q
 from DataStructures.Stack import stack as st
 from DataStructures.Map import map_linear_probing as lp
 from DataStructures.Map import map_separate_chaining as sc
+from datetime import datetime as dt
 
 csv.field_size_limit(2147483647)
 
@@ -14,7 +15,8 @@ def new_logic():
     Crea el catalogo para almacenar las estructuras de datos
     """
     #TODO: Llama a las funciónes de creación de las estructuras de datos 
-    #HECHO
+    # HECHO
+
     catalog = lp.new_map(11, 0.5, 109345121)
 
     lp.put(catalog, "source", ar.new_list())
@@ -39,71 +41,122 @@ def load_data(catalog, filename):
     Carga los datos del reto
     """
     # TODO: Realizar la carga de datos
+    # HECHO
     with open(filename, mode = "r", encoding='utf-8') as file:
         start_time = get_time()
         input_file = csv.DictReader(file)
         count = 0
         año_max = 0
         año_min = 0
-        last_five = sl.new_list()
-        first_five = sl.new_list()
+        last_five = ar.new_list()
+        first_five = ar.new_list()
 
-        for x in input_file:
-            ar.add_last(lp.get(catalog, "source"), x["source"])
-            ar.add_last(lp.get(catalog, "commodity"), x["commodity"])
-            ar.add_last(lp.get(catalog, "statical_category"), x["statical_category"])
-            ar.add_last(lp.get(catalog, "unit_measurement"), x["unit_measurement"])
-            ar.add_last(lp.get(catalog, "state_name"), x["state_name"])
-            ar.add_last(lp.get(catalog, "location"), x["location"])
-            ar.add_last(lp.get(catalog, "year_collection"), x["year_collection"])
-            ar.add_last(lp.get(catalog, "freq_collection"), x["freq_collection"])
-            ar.add_last(lp.get(catalog, "reference_period"), x["reference_period"])
-            ar.add_last(lp.get(catalog, "load_time"), x["load_time"])
-            ar.add_last(lp.get(catalog, "value"), x["value"])
+        for row in input_file:
+            ar.add_last(lp.get(catalog, "source"), row["source"])
+            ar.add_last(lp.get(catalog, "commodity"), row["commodity"])
+            ar.add_last(lp.get(catalog, "statical_category"), row["statical_category"])
+            ar.add_last(lp.get(catalog, "unit_measurement"), row["unit_measurement"])
+            ar.add_last(lp.get(catalog, "state_name"), row["state_name"])
+            ar.add_last(lp.get(catalog, "location"), row["location"])
+            ar.add_last(lp.get(catalog, "year_collection"), row["year_collection"])
+            ar.add_last(lp.get(catalog, "freq_collection"), row["freq_collection"])
+            ar.add_last(lp.get(catalog, "reference_period"), row["reference_period"])
+            ar.add_last(lp.get(catalog, "load_time"), row["load_time"])
+            ar.add_last(lp.get(catalog, "value"), row["value"])
 
-            if int(x["year_collection"]) > año_max or año_max == 0:
-                año_max = int(x["year_collection"])
-            if int(x["year_collection"]) < año_min or año_min == 0:
-                año_min = int(x["year_collection"])
-            count += 1
+            if int(row["year_collection"]) > año_max or año_max == 0:
+                año_max = int(row["year_collection"])
+            if int(row["year_collection"]) < año_min or año_min == 0:
+                año_min = int(row["year_collection"])
 
-            datos_listas = {"year_collection": x["year_collection"],
-                            "load_time": x["load_time"],
-                            "state_name": x["state_name"],
-                            "source": x["source"],
-                            "unit_measurement": x["unit_measurement"],
-                            "value": x["value"]}
+            datos_listas = [row["year_collection"],
+                            row["load_time"],
+                            row["state_name"],
+                            row["source"],
+                            row["unit_measurement"],
+                            row["value"]]
+
             if count < 5:
-                sl.add_last(first_five, datos_listas)
+                ar.add_last(first_five, datos_listas)
 
             elif count >= 5:
-                sl.add_last(last_five, datos_listas)
-                if sl.size(last_five) > 5:
-                    sl.remove_first(first_five)
-        end_time = get_time()
-        delta = delta_time(start_time, end_time)
-        return delta, count, año_min, año_max, last_five, first_five
+                ar.add_last(last_five, datos_listas)
+                if ar.size(last_five) > 5:
+                    ar.remove_first(last_five)
 
-    
+            count += 1
+
+        end_time = get_time()
+        delta = str(round(delta_time(start_time, end_time),2)) + " ms"
+
+        generales = ar.new_list()
+        ar.add_last(generales, delta)
+        ar.add_last(generales, count)
+        ar.add_last(generales, año_min)
+        ar.add_last(generales, año_max)
+        print(ar.get_element(lp.get(catalog, "load_time"), 6))
+
+        return generales, first_five, last_five
+
+
 
 # Funciones de consulta sobre el catálogo
 
-def get_data(catalog, id):
-    """
-    Retorna un dato por su ID.
-    """
-    #TODO: Consulta en las Llamar la función del modelo para obtener un dato
-    pass
+def req_1(catalog, year):
+    
+    start_time = get_time()
+
+    index = 0
+    count = 0
+    index_mayor = 0
+
+    fecha_mayor = None
 
 
-def req_1(catalog):
-    """
-    Retorna el resultado del requerimiento 1
-    """
-    # TODO: Modificar el requerimiento 1
-    pass
+    for year_lista in lp.get(catalog, "year_collection")["elements"]:
 
+        if year_lista == year:
 
+            if fecha_mayor is None:
+
+                fecha_mayor = ar.get_element(lp.get(catalog, "load_time"), index)
+                fecha_mayor_dt = dt.strptime(fecha_mayor, "%m/%d/%Y %H:%M")
+                index_mayor = index
+
+            fecha_year = ar.get_element(lp.get(catalog, "load_time"), index)
+            fecha_year_dt = dt.strptime(fecha_year, "%m/%d/%Y %H:%M")
+            count += 1
+
+            if fecha_year_dt >= fecha_mayor_dt: # por >= retorna el último
+                fecha_mayor = ar.get_element(lp.get(catalog, "load_time"), index)
+                fecha_mayor_dt = dt.strptime(fecha_mayor, "%m/%d/%Y %H:%M")
+                index_mayor = index
+
+        index += 1
+
+    if fecha_mayor is None:
+        return None 
+    
+    datos_mayor = ar.new_list()
+    ar.add_last(datos_mayor,ar.get_element(lp.get(catalog, "year_collection"), index_mayor))
+    ar.add_last(datos_mayor,ar.get_element(lp.get(catalog, "load_time"), index_mayor))
+    ar.add_last(datos_mayor,ar.get_element(lp.get(catalog, "source"), index_mayor))
+    ar.add_last(datos_mayor,ar.get_element(lp.get(catalog, "freq_collection"), index_mayor))
+    ar.add_last(datos_mayor,ar.get_element(lp.get(catalog, "state_name"), index_mayor))
+    ar.add_last(datos_mayor,ar.get_element(lp.get(catalog, "commodity"), index_mayor))
+    ar.add_last(datos_mayor,ar.get_element(lp.get(catalog, "unit_measurement"), index_mayor))
+    ar.add_last(datos_mayor,ar.get_element(lp.get(catalog, "value"), index_mayor))
+
+    end_time = get_time()
+    delta = str(round(delta_time(start_time, end_time),2)) + " ms"
+
+    general = ar.new_list()
+    ar.add_last(general, delta)
+    ar.add_last(general, count)
+
+    return general, datos_mayor
+            
+            
 def req_2(catalog):
     """
     Retorna el resultado del requerimiento 2
