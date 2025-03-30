@@ -215,7 +215,6 @@ o Tipo del producto del registro (ej.: “HOGS”, “SHEEP”, etc.)
     ar.add_last(general, count)
     ar.add_last(general, count_survey)
     ar.add_last(general, count_census)
-#ar.add_last(general, count_survey + count_census) No uso esto pq no se si es cierto en todo caso
 
     return general, result
 
