@@ -293,29 +293,28 @@ def shell_sort(my_list, sort_crit):
     n = size(my_list)
 
     if n <= 1:
-        result = my_list
+        return my_list
 
-    else:
+    # Generate the 3h + 1 sequence
+    gap = 1
+    while gap < n // 3:
+        gap = 3 * gap + 1  # Knuth sequence
 
-        gap = n // 2 #????
+    # Perform the sorting using the gaps in reverse order
+    while gap > 0:
+        for i in range(gap, n):
+            elem = get_element(my_list, i)
+            j = i
 
-        while gap > 0:
+            # Compare and swap elements based on the gap
+            while j >= gap and sort_crit(elem, get_element(my_list, j - gap)):
+                exchange(my_list, j, j - gap)
+                j -= gap
 
-            for i in range(gap, n):
-                elem = get_element(my_list, i)
-                j = i
+        # Move to the next smaller gap
+        gap //= 3
 
-                while j >= gap and sort_crit(elem, get_element(my_list, j - gap)):
-
-                    exchange(my_list, j, j-gap)
-                    j -= gap
-
-            gap = gap // 2
-
-        result = my_list
-
-    return result
-
+    return my_list
 
 def merge_sort(my_list, sort_crit):
     n = size(my_list)
@@ -382,4 +381,3 @@ def partition(arr, low, high):
 
 
 
- 
