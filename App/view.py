@@ -91,7 +91,28 @@ def print_req_3(control):
         Función que imprime la solución del Requerimiento 3 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 3
-    pass
+    año_i = input("\nIngresa el año inicial del filtro: ")
+    año_f = input("\nIngrese el año final del filtro: ")
+    estado = input("Ingrese el estado por el cual desea filtrar: ")
+    estado_1 = estado.replace(" ", "")
+    estado_2 = estado_1.upper()
+
+    result = lg.req3(control, estado_2, año_i, año_f)
+    if result == None:
+        print("\nNo se encontraron registos en el estado {estado_2} entre los años {año_i} - {año_f}")
+    else:
+        headers = ["Fuente", "Año de recolección", "Fecha de carga", "Frecuencia de recolección", "Producto", "Unidad de medición"]
+
+        if ar.size(result) <= 20:
+            print("\nLos registros tomados en el estado {estado_2} dentro del rango de años {año_i} - {año_f} son:\n")
+            print(tb.tabulate(result["elements"], headers, tablefmt="pretty"))
+        else:
+            primeros_5 = ar.sub_list(result, 0, 5)
+            ultimos_5 = ar.sub_list(result, -5, 5)
+            print("\nLos primeros 5 registros tomados en el estado {estado_2} dentro del rango de años {año_i} - {año_f} son:\n")
+            print(tb.tabulate(primeros_5["elements"], headers, tablefmt="pretty"))
+            print("\nLos últimos 5 registros tomados en el estado {estado_2} dentro del rango de años {año_i} - {año_f} son:\n")
+            print(tb.tabulate(ultimos_5["elements"], headers, tablefmt="pretty"))
 
 
 def print_req_4(control):
@@ -151,7 +172,28 @@ def print_req_6(control):
         Función que imprime la solución del Requerimiento 6 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 6
-    pass
+    fecha_i = input("\nIngresa la fecha inicial del filtro en el fromato YYYY-MM-DD: ")
+    fecha_f = input("\nIngrese la fecha final del filtro en el fromato YYYY-MM-DD: ")
+    estado = input("Ingrese el estado por el cual desea filtrar: ")
+    estado_1 = estado.replace(" ", "")
+    estado_2 = estado_1.upper()
+
+    result = lg.req3(control, estado_2, fecha_i, fecha_f)
+    if result == None:
+        print("\nNo se encontraron registos en el estado {estado_2} entre los años {fecha_i} - {fecha_f}")
+    else:
+        headers = ["Fuente", "Año de recolección", "Fecha de carga", "Frecuencia de recolección", "Estado", "Unidad de medición", "Producto"]
+
+        if ar.size(result) <= 20:
+            print("\nLos registros tomados en el estado {estado_2} dentro del rango de años {fecha_i} - {fecha_f} son:\n")
+            print(tb.tabulate(result["elements"], headers, tablefmt="pretty"))
+        else:
+            primeros_5 = ar.sub_list(result, 0, 5)
+            ultimos_5 = ar.sub_list(result, -5, 5)
+            print("\nLos primeros 5 registros tomados en el estado {estado_2} dentro del rango de años {fecha_i} - {fecha_f} son:\n")
+            print(tb.tabulate(primeros_5["elements"], headers, tablefmt="pretty"))
+            print("\nLos últimos 5 registros tomados en el estado {estado_2} dentro del rango de años {fecha_i} - {fecha_f} son:\n")
+            print(tb.tabulate(ultimos_5["elements"], headers, tablefmt="pretty"))
 
 
 def print_req_7(control):

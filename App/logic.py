@@ -101,116 +101,30 @@ def load_data(catalog, filename):
 
 # Funciones de consulta sobre el catálogo
 
-def req_1(catalog, year):
-    
-    start_time = get_time()
-
-    index = 0
-    count = 0
-    index_mayor = 0
-
-    fecha_mayor = None
-
-    for year_lista in lp.get(catalog, "year_collection")["elements"]:
-        int_year = int(year_lista.replace(" ", ""))
-
-        if int_year == year:
-
-            if fecha_mayor is None:
-
-                fecha_mayor = ar.get_element(lp.get(catalog, "load_time"), index)
-                fecha_mayor_dt = dt.strptime(fecha_mayor, "%m/%d/%Y %H:%M")
-                index_mayor = index
-
-            fecha_year = ar.get_element(lp.get(catalog, "load_time"), index)
-            fecha_year_dt = dt.strptime(fecha_year, "%m/%d/%Y %H:%M")
-            count += 1
-
-            if fecha_year_dt >= fecha_mayor_dt: # por >= retorna el último
-                fecha_mayor = ar.get_element(lp.get(catalog, "load_time"), index)
-                fecha_mayor_dt = dt.strptime(fecha_mayor, "%m/%d/%Y %H:%M")
-                index_mayor = index
-
-        index += 1
-
-    if fecha_mayor is None:
-        return None 
-    
-    datos_mayor = ar.new_list()
-    ar.add_last(datos_mayor,ar.get_element(lp.get(catalog, "year_collection"), index_mayor))
-    ar.add_last(datos_mayor,ar.get_element(lp.get(catalog, "load_time"), index_mayor))
-    ar.add_last(datos_mayor,ar.get_element(lp.get(catalog, "source"), index_mayor))
-    ar.add_last(datos_mayor,ar.get_element(lp.get(catalog, "freq_collection"), index_mayor))
-    ar.add_last(datos_mayor,ar.get_element(lp.get(catalog, "state_name"), index_mayor))
-    ar.add_last(datos_mayor,ar.get_element(lp.get(catalog, "commodity"), index_mayor))
-    ar.add_last(datos_mayor,ar.get_element(lp.get(catalog, "unit_measurement"), index_mayor))
-    ar.add_last(datos_mayor,ar.get_element(lp.get(catalog, "value"), index_mayor))
-
-    end_time = get_time()
-    delta = str(round(delta_time(start_time, end_time),2)) + " ms"
-
-    general = ar.new_list()
-    ar.add_last(general, delta)
-    ar.add_last(general, count)
-
-    return general, datos_mayor
-
-def req_2(catalog, state, N):
-    start_time = get_time()
-    mapa_tiempos = lp.new_map(ar.size(lp.get(catalog, "state_name")), 0.5) # q uso como size?????
-    index = 0
-    count = 0
-    for estado in lp.get(catalog, "state_name")["elements"]:
-        estadom = estado.replace(" ", "").upper()
-        if estadom == state:
-            load_time_date = dt.strptime(ar.get_element(lp.get(catalog, "load_time"), index),"%m/%d/%Y %H:%M")
-            if lp.contains(mapa_tiempos, load_time_date) is False:
-                lp.put(mapa_tiempos, load_time_date, ar.new_list())
-            ar.add_last(lp.get(mapa_tiempos, load_time_date), index)
-            count += 1
-        index += 1
-    
+def get_data(catalog, id):
+    """
+    Retorna un dato por su ID.
+    """
+    #TODO: Consulta en las Llamar la función del modelo para obtener un dato
+    pass
 
 
-    if count == 0:
-        return None
-    
-    tiempos = lp.key_set(mapa_tiempos)
-    sorted_times = ar.merge_sort(tiempos, ar.default_sort_criteria)
+def req_1(catalog):
+    """
+    Retorna el resultado del requerimiento 1
+    """
+    # TODO: Modificar el requerimiento 1
+    pass
 
-    sorted_indices = []
-    #sorted_indices = ar.new_list()
 
-    for load_time in sorted_times["elements"]:
-        indices = lp.get(mapa_tiempos, load_time)
-        sorted_indices_i = ar.merge_sort_indice(indices, ar.sort_states_indices, catalog) # este resulta innecesario    
-                                                                                  #considerando que los nombres de los estados son iguales
-        sorted_indices.extend(sorted_indices_i["elements"])
-        #for idx in sorted_indices_i["elements"]: #Que hago???????????
-           # ar.add_last(sorted_indices, idx)
+def req_2(catalog):
+    """
+    Retorna el resultado del requerimiento 2
+    """
+    # TODO: Modificar el requerimiento 2
+    pass
 
-    result = ar.new_list()
-    for idx in sorted_indices[-N:]:
-        record = [] # puedo usar una lista de las creadas pero me toca volver a iterar en el view
-        record.append(ar.get_element(lp.get(catalog, "year_collection"), idx))
-        record.append(ar.get_element(lp.get(catalog, "load_time"), idx))
-        record.append(ar.get_element(lp.get(catalog, "source"), idx))
-        record.append(ar.get_element(lp.get(catalog, "freq_collection"), idx))
-        record.append(ar.get_element(lp.get(catalog, "state_name"), idx))
-        record.append(ar.get_element(lp.get(catalog, "commodity"), idx))
-        record.append(ar.get_element(lp.get(catalog, "unit_measurement"), idx))
-        record.append(ar.get_element(lp.get(catalog, "value"), idx))
-        ar.add_last(result, record)
 
-    end_time = get_time()
-    delta = str(round(delta_time(start_time, end_time), 2)) + " ms"
-    
-    general = ar.new_list()
-    ar.add_last(general, delta)
-    ar.add_last(general, count)
-
-    return general, result
-                                        
 def req_3(catalog):
     """
     Retorna el resultado del requerimiento 3
@@ -295,12 +209,64 @@ def req_5(catalog):
     # TODO: Modificar el requerimiento 5
     pass
 
-def req_6(catalog):
-    """
-    Retorna el resultado del requerimiento 6
-    """
-    # TODO: Modificar el requerimiento 6
-    pass
+def req6(catalog, departamento, año_i, año_f):
+    start_time = get_time()
+    count_total = 0
+    count_survey = 0
+    count_census = 0
+    lista_años_collección = lp.get(catalog, "year_collection")
+    lista_departamento = lp.get(catalog, "state+_name")
+    lista_fuente = lp.get(catalog, "source")
+    lista_frecuencia = lp.get(catalog, "freq_collection")
+    lista_producto = lp.get(catalog, "commodity")
+    lista_unidad = lp.get(catalog, "unit_measurement")
+    lista_carga = lp.get(catalog, "load_time")
+    size = ar.size(lista_años_collección)
+    lista_datos = ar.new_list()
+
+    for i in range(size):
+        if ar.get_element(lista_carga, i) >= str(año_i) and ar.get_element(lista_carga, i) <= str(año_f) and ar.get_element(lista_departamento, i) == departamento:
+            lista_un_dato = ar.new_list()
+            count_total += 1 
+            if ar.get_element(lista_fuente, i) == "SURVEY":
+                count_survey += 1
+            elif ar.get_element(lista_fuente, i) == "CENSUS":
+                count_census += 1
+            ar.add_last(lista_un_dato, ar.get_element(lista_fuente, i))
+            ar.add_last(lista_un_dato, ar.get_element(lista_años_collección, i))
+            ar.add_last(lista_un_dato, ar.get_element(lista_carga, i))
+            ar.add_last(lista_un_dato, ar.get_element(lista_frecuencia, i))
+            ar.add_last(lista_un_dato, ar.get_element(lista_producto, i))
+            ar.add_last(lista_un_dato, ar.get_element(lista_unidad, i))
+            ar.add_last(lista_un_dato, ar.get_element(lista_departamento, i))
+
+            ar.add_last(lista_datos, lista_un_dato)
+
+    ar.shell_sort(lista_datos, sort_criteria_6)
+
+    if ar.is_empty(lista_datos):
+        result = None
+    
+    elif ar.size(lista_datos) <= 20:
+        ar.add_last(lista_datos, [count_total, count_survey, count_census])
+        result = lista_datos
+
+    else:
+        recortada = ar.new_list()
+        for i in range(-5,5):
+            ar.add_last(recortada, ar.get_element(lista_datos, i))
+        ar.add_last(recortada, [count_total, count_survey, count_census])
+        result = recortada
+    end_time = get_time()
+    time = delta_time(start_time, end_time)
+    print("\nTiempo" + str(time) + "ms")
+    return result
+
+def sort_criteria_6(año_1, año_2):
+    is_sorted = False
+    if año_1[:10] > año_2[:10]:
+        is_sorted = True
+    return is_sorted
 
 
 def req_7(catalog):
