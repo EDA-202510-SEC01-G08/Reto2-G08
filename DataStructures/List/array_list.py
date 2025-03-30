@@ -1,3 +1,4 @@
+from DataStructures.Map import map_linear_probing as lp
 def new_list():
     new_list = {"elements": [],
                 "size": 0,
@@ -124,7 +125,7 @@ def selection_sort(my_list, sort_criteria):
             f = 1 + i
             pos_menor = i
             while f < tamano:
-                sort = sort_criteria(get_element(my_list, f),menor)# pedro edita esto con base al nuevo sort criteria
+                sort = sort_criteria(get_element(my_list, f),menor)
                 if sort == True:
                     menor = get_element(my_list, f)
                     pos_menor = f
@@ -147,7 +148,7 @@ def insertion_sort(my_list, sort_crit):
             f = i - 1
             x = i
             while f > -1:
-                sort = sort_crit(get_element(my_list, x), get_element(my_list,f))# lo mismo pq la f me confunde xddd
+                sort = sort_crit(get_element(my_list, x), get_element(my_list,f))
                 if sort == True:
                     exchange(my_list, x, f)
                     x -= 1
@@ -185,26 +186,6 @@ def shell_sort(my_list, sort_crit):
 
     return result
 
-
-
-
-def merge_sort(my_list, sort_crit):
-    n = size(my_list)
-
-    if n <= 1:
-        return my_list  
-
-    mid = n // 2
-
-    if n % 2 == 0:
-        l = merge_sort(sub_list(my_list, 0, mid), sort_crit)
-        r = merge_sort(sub_list(my_list, mid, mid ), sort_crit)
-    else:
-        l = merge_sort(sub_list(my_list, 0, mid), sort_crit)
-        r = merge_sort(sub_list(my_list, mid, mid + 1), sort_crit)
-
-    return merge(l, r, sort_crit)
-
 def merge(lista1, lista2, sort_crit):
     lista = new_list()  
     i = 0
@@ -228,14 +209,31 @@ def merge(lista1, lista2, sort_crit):
 
     return lista 
 
-lista = {"elements": [1, 23, 5, 32, 4, 35, 45, 43], "size": 8}
+def merge_sort(my_list, sort_crit):
+    n = size(my_list)
+
+    if n <= 1:
+        return my_list  
+
+    mid = n // 2
+
+    if n % 2 == 0:
+        l = merge_sort(sub_list(my_list, 0, mid), sort_crit)
+        r = merge_sort(sub_list(my_list, mid, mid ), sort_crit)
+    else:
+        l = merge_sort(sub_list(my_list, 0, mid), sort_crit)
+        r = merge_sort(sub_list(my_list, mid, mid + 1), sort_crit)
+
+    return merge(l, r, sort_crit)
+
+
 
 def quick_sort(arr, sort_crit, low=0, high=None):
     if high is None:  # First call, set high to the last index
         high = arr["size"] - 1
 
     if low < high:  # Ensure valid indices
-        pi = partition(arr, low, high)
+        pi = partition(arr, low, high) 
         
         quick_sort(arr, sort_crit, low, pi - 1)
         quick_sort(arr, sort_crit, pi + 1, high)
@@ -252,4 +250,52 @@ def partition(arr, low, high):
     exchange(arr, i + 1, high)
     return i + 1
 
+def sort_states_indices(index1, index2, catalog):
+    is_sorted = -1
+    if get_element(lp.get(catalog, "state_name"), index1) == get_element(lp.get(catalog, "state_name"), index2):
+        is_sorted = 0
+    elif get_element(lp.get(catalog, "state_name"), index1) < get_element(lp.get(catalog, "state_name"), index2):
+        is_sorted = 1
+    return is_sorted
 
+def merge_indice(lista1, lista2, sort_crit, catalog):
+
+    lista = new_list()  
+    i = 0
+    j = 0
+
+    while i < size(lista1) and j < size(lista2):
+
+        if sort_crit(get_element(lista1, i), get_element(lista2, j), catalog) == 1: 
+            add_last(lista, get_element(lista1, i))
+            i += 1
+        else:
+            add_last(lista, get_element(lista2, j))
+            j += 1
+
+    while i < size(lista1):
+        add_last(lista, get_element(lista1, i))
+        i += 1
+
+    while j < size(lista2):
+        add_last(lista, get_element(lista2, j))
+        j += 1
+
+    return lista
+
+def merge_sort_indice(my_list, sort_crit, catalog):
+    n = size(my_list)
+
+    if n <= 1:
+        return my_list  
+
+    mid = n // 2
+
+    if n % 2 == 0:
+        l = merge_sort_indice(sub_list(my_list, 0, mid), sort_crit, catalog)
+        r = merge_sort_indice(sub_list(my_list, mid, mid ), sort_crit, catalog)
+    else:
+        l = merge_sort_indice(sub_list(my_list, 0, mid), sort_crit, catalog)
+        r = merge_sort_indice(sub_list(my_list, mid, mid + 1), sort_crit, catalog)
+
+    return merge_indice(l, r, sort_crit, catalog)
