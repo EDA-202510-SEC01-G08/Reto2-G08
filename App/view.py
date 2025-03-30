@@ -1,7 +1,8 @@
 import sys
 from App import logic as lg
 import tabulate as tb   
-
+import datetime as dt
+from DataStructures.List import array_list as ar
 default_limit = 1000
 sys.setrecursionlimit(default_limit*10)
 
@@ -42,26 +43,47 @@ def load_data(control):
 def print_req_1(control):
     
     input_year = input("\nIngrese el año a consultar: ")
+    yearss = int(input_year.replace(" ", ""))
 
-    result = lg.req_1(control, input_year)
+    result = lg.req_1(control, yearss)
 
     if result is None:
-        print(f"\nNo se encontraron registros para el año {input_year}.")
+        print(f"\nNo se encontraron registros para el año {yearss}.")
     
     else:
         headers_generales = ["Tiempo de carga", "Registros que cumplieron el filtro"]
         print(tb.tabulate([result[0]["elements"]], headers_generales, tablefmt="pretty"))
 
-        print(f"\nEl último registro recopilado en el año {input_year} es :\n")
+        print(f"\nEl último registro recopilado en el año {yearss} es :\n")
         headers = ["Año de recolección", "Fecha de carga", "Fuente", "Frecuencia",  "Estado", "Tipo de producto", "Unidad de medida", "Valor"]
         print(tb.tabulate([result[1]["elements"]], headers, tablefmt="pretty"))
 
 def print_req_2(control):
-    """
-        Función que imprime la solución del Requerimiento 2 en consola
-    """
-    # TODO: Imprimir el resultado del requerimiento 2
-    pass
+    
+    input_state = input("\nIngrese el estado a consultar: ")
+    statess = input_state.replace(" ", "")
+    statesm = statess.upper()
+    input_N = input("\nIngrese el número de registros que quiere listar: ")
+    N = int(input_N.replace(" ", ""))
+
+    if N == 0:
+        print("\nEl número de registros no puede ser 0.")
+
+    else:
+        result = lg.req_2(control, statesm, N)
+
+        if result is None:
+            print(f"\nNo se encontraron registros para el estado {input_state}.")
+
+        else:
+            headers_generales = ["Tiempo de carga", "Registros que cumplieron el filtro"]
+            print(tb.tabulate([result[0]["elements"]], headers_generales, tablefmt="pretty"))
+
+            result[1]["elements"] = result[1]["elements"][::-1] #reverso la lista para tener orden 
+
+            print(f"\nLos últimos {input_N} registros cargados del estado {statesm.capitalize()} son:\n")
+            headers = ["Año de recolección", "Fecha de carga", "Fuente", "Frecuencia",  "Estado", "Tipo de producto", "Unidad de medida", "Valor"]
+            print(tb.tabulate(result[1]["elements"], headers, tablefmt="pretty"))
 
 
 def print_req_3(control):
@@ -73,11 +95,47 @@ def print_req_3(control):
 
 
 def print_req_4(control):
-    """
-        Función que imprime la solución del Requerimiento 4 en consola
-    """
-    # TODO: Imprimir el resultado del requerimiento 4
-    pass
+    
+    input_product = input("\nIngrese el tipo de producto a consultar: ")
+    productss = input_product.replace(" ", "")
+    productsm = productss.upper()
+    input_year_i = input("\nIngrese el año inicial a consultar: ")
+    year_i = int(input_year_i.replace(" ", ""))
+    input_year_f = input("\nIngrese el año final a consultar: ")
+    year_f = int(input_year_f.replace(" ", ""))
+
+    if year_f > dt.datetime.now().year:
+        print("\nNo se puede viajar en el tiempo.")
+
+    elif year_i > year_f:
+        print("\nEl año inicial no puede ser mayor al año final.")
+    
+    else:
+        result = lg.req_4(control, productsm, year_i, year_f)
+
+        if result is None:
+            print(f"\nNo se encontraron registros para el producto {input_product} en el rango de años {year_i} - {year_f}.")
+
+        else:
+
+            headers_generales = ["Tiempo de carga", "Registros que cumplieron el filtro", "Registros con fuente 'SURVEY' ", "Registros con fuente 'CENSUS' "]
+            print(tb.tabulate([result[0]["elements"]], headers_generales, tablefmt="pretty"))
+
+            result[1]["elements"] = result[1]["elements"][::-1] #reverso la lista para tener orden
+            headers = ["Fuente", "Año de recolección", "Fecha de carga", "Frecuencia",  "Estado", "Unidad de medida"]
+
+            if ar.size(result[1]) <= 20:
+                print(f"\nLos registros que tienen como commodity {productsm} y están en el rango de años {year_i} - {year_f} son:\n")
+                print(tb.tabulate(result[1]["elements"], headers, tablefmt="pretty"))
+            
+            else:
+                primeros_5 = ar.sub_list(result[1], 0, 5)
+                ultimos_5 = ar.sub_list(result[1], ar.size(result[1])-5, 5)
+                print(f"\nLos primeros 5 registros que tienen como commodity {productsm} y están en el rango de años {year_i} - {year_f} son:\n")
+                print(tb.tabulate(primeros_5["elements"], headers, tablefmt="pretty"))
+                print(f"\nLos últimos 5 registros que tienen como commodity {productsm} y están en el rango de años {year_i} - {year_f} son:\n")
+                print(tb.tabulate(ultimos_5["elements"], headers, tablefmt="pretty"))
+
 
 
 def print_req_5(control):
