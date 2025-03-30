@@ -112,12 +112,63 @@ def req_2(catalog):
     pass
 
 
-def req_3(catalog):
-    """
-    Retorna el resultado del requerimiento 3
-    """
-    # TODO: Modificar el requerimiento 3
-    pass
+def req3(catalog, departamento, año_i, año_f):
+    start_time = get_time()
+    count_total = 0
+    count_survey = 0
+    count_census = 0
+    lista_años_collección = lp.get(catalog, "year_collection")
+    lista_departamento = lp.get(catalog, "state+_name")
+    lista_fuente = lp.get(catalog, "source")
+    lista_frecuencia = lp.get(catalog, "freq_collection")
+    lista_producto = lp.get(catalog, "commodity")
+    lista_unidad = lp.get(catalog, "unit_measurement")
+    lista_carga = lp.get(catalog, "load_time")
+    size = ar.size(lista_años_collección)
+    lista_datos = ar.new_list()
+
+    for i in range(size):
+        if ar.get_element(lista_años_collección, i) >= año_i and ar.get_element(lista_años_collección, i) <= año_f and ar.get_element(lista_departamento, i) == departamento:
+            lista_un_dato = ar.new_list()
+            count_total += 1 
+            if ar.get_element(lista_fuente, i) == "SURVEY":
+                count_survey += 1
+            elif ar.get_element(lista_fuente, i) == "CENSUS":
+                count_census += 1
+            ar.add_last(lista_un_dato, ar.get_element(lista_fuente, i))
+            ar.add_last(lista_un_dato, ar.get_element(lista_años_collección, i))
+            ar.add_last(lista_un_dato, ar.get_element(lista_carga, i))
+            ar.add_last(lista_un_dato, ar.get_element(lista_frecuencia, i))
+            ar.add_last(lista_un_dato, ar.get_element(lista_producto, i))
+            ar.add_last(lista_un_dato, ar.get_element(lista_unidad, i))
+
+            ar.add_last(lista_datos, lista_un_dato)
+
+    ar.shell_sort(lista_datos, sort_criteria_3)
+
+    if ar.is_empty(lista_datos):
+        result = None
+    
+    elif ar.size(lista_datos) <= 20:
+        ar.add_last(lista_datos, [count_total, count_survey, count_census])
+        result = lista_datos
+
+    else:
+        recortada = ar.new_list()
+        for i in range(-5,5):
+            ar.add_last(recortada, ar.get_element(lista_datos, i))
+        ar.add_last(recortada, [count_total, count_survey, count_census])
+        result = recortada
+    end_time = get_time()
+    time = delta_time(start_time, end_time)
+    print("\nTiempo" + str(time) + "ms")
+    return result
+
+def sort_criteria_3(año_1, año_2):
+    is_sorted = False
+    if año_1[:10] > año_2[:10]:
+        is_sorted = True
+    return is_sorted
 
 
 def req_4(catalog):
