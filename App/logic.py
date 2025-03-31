@@ -149,7 +149,7 @@ def req_5(catalog,categoria, year_i, year_f):
     unidades = lp.get(catalog, "unit_measurement")["elements"]
     productos = lp.get(catalog, "commodity")["elements"]
     
-    for indice in range(len(categorias)):
+    for indice in catalog["statical_category"]["elements"]:
         categoria_actual = categorias[indice]
         anio_actual = int(anios[indice])
         
