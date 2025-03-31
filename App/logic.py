@@ -128,95 +128,64 @@ def req_4(catalog):
     pass
 
 
-def req_5(catalog,category, year_i, year_f):
+def req_5(catalog,categoria, year_i, year_f):
     """
     Retorna el resultado del requerimiento 5
-    Como analista de datos agrícola quiero consultar los registros recopilados para una categoría estadística de mi 
-interés entre un rango de años de recopilación dado. 
-Los parámetros de entrada de este requerimiento son: 
-• Categoría estadística para filtrar (ej.: “INVENTORY”, “SALES”, etc.) 
-• Año inicial del periodo a consultar (con formato "YYYY ", ej.: “2007”). 
-• Año final del periodo a consultar (con formato "YYYY", ej.: “2010”). 
-La respuesta esperada debe contener: 
-• Tiempo de la ejecución del requerimiento en milisegundos. 
-• Número total de registros que cumplieron el filtro. 
-• Número total de registros con tipo de fuente/origen “SURVEY” 
-• Número total de registros con tipo de fuente/origen “CENSUS” 
-• Para el listado de registros resultante, presentar por cada uno de los registros la siguiente información 
-ordenados de manera descendente por fecha de carga del registro: 
-o Tipo de fuente/origen del registro. (ej.: “CENSUS” o “SURVEY”) 
-o Año de recopilación del registro. (ej.: “2007”) 
-o Fecha de carga del registro. (con formato "%Y-%m-%d". ej.: “2012-05-15”). 
-o Frecuencia de la recopilación del registro. (ej.: “ANNUAL”, “WEEKLY”, etc.) 
-o Nombre del departamento del registro.  
-o Unidad de medición del registro. (ej.: “HEAD”, “$”, etc.) 
-o Tipo del producto del registro (ej.: “HOGS”, “SHEEP”, etc.) 
-    """
+"""
     # TODO: Modificar el requerimiento 5
-    start_time = get_time()
-
-    load_time_map = lp.new_map(ar.size(lp.get(catalog, "load_time")), 0.5)
-
-    index = 0
-    count = 0
-    count_survey = 0
-    count_census = 0
-
-    for categoria in lp.get(catalog, "statical_category")["elements"]:
-        categoria = categoria.replace(" ", "").upper()
-
-        if categoria == category:
-            year = int(ar.get_element(lp.get(catalog, "year_collection"), index).replace(" ", ""))
-            if year_i <= year <= year_f:
-                load_time = dt.strptime(ar.get_element(lp.get(catalog, "load_time"), index), "%m/%d/%Y %H:%M")
-                if lp.contains(load_time_map, load_time) is False:
-                    lp.put(load_time_map, load_time, ar.new_list())
-                ar.add_last(lp.get(load_time_map, load_time), index)
-
-                count += 1
-
-                if ar.get_element(lp.get(catalog, "source"), index).replace(" ", "").upper() == "SURVEY":
-                    count_survey += 1
-
-                elif ar.get_element(lp.get(catalog, "source"), index).replace(" ", "").upper() == "CENSUS":
-                    count_census += 1
-        index += 1
-
-    if count == 0:
-        return None
-
-    load_times = lp.key_set(load_time_map)
-    sorted_load_times = ar.merge_sort(load_times, ar.default_sort_criteria)
-
-    sorted_indices = []
-    for load_time in sorted_load_times["elements"]:
-        indices = lp.get(load_time_map, load_time)
-        sorted_indices_i = ar.merge_sort_indice(indices, ar.sort_states_indices, catalog)
-        sorted_indices.extend(sorted_indices_i["elements"])
-
-    result = ar.new_list()
-    for idx in sorted_indices:
-        record = []
-        record.append(ar.get_element(lp.get(catalog, "source"), idx))
-        record.append(ar.get_element(lp.get(catalog, "year_collection"), idx))
-        record.append(ar.get_element(lp.get(catalog, "load_time"), idx))
-        record.append(ar.get_element(lp.get(catalog, "freq_collection"), idx))
-        record.append(ar.get_element(lp.get(catalog, "state_name"), idx))
-        record.append(ar.get_element(lp.get(catalog, "unit_measurement"), idx))
-        record.append(ar.get_element(lp.get(catalog, "commodity"), idx))
-
-        ar.add_last(result, record)
-
-    end_time = get_time()
-    delta = str(round(delta_time(start_time, end_time), 2)) + " ms"
-
-    general = ar.new_list()
-    ar.add_last(general, delta)
-    ar.add_last(general, count)
-    ar.add_last(general, count_survey)
-    ar.add_last(general, count_census)
-
-    return general, result
+    start_time = time.time()
+    
+    registros = ar.new_list()
+    total_survey = 0
+    total_census = 0
+    total_registros = 0
+    
+    categorias = lp.get(catalog, "statical_category")["elements"]
+    anios = lp.get(catalog, "year_collection")["elements"]
+    fuentes = lp.get(catalog, "source")["elements"]
+    tiempos_carga = lp.get(catalog, "load_time")["elements"]
+    frecuencias = lp.get(catalog, "freq_collection")["elements"]
+    estados = lp.get(catalog, "state_name")["elements"]
+    unidades = lp.get(catalog, "unit_measurement")["elements"]
+    productos = lp.get(catalog, "commodity")["elements"]
+    
+    for indice in range(len(categorias)):
+        categoria_actual = categorias[indice]
+        anio_actual = int(anios[indice])
+        
+        if categoria_actual == categoria and year_i <= anio_actual <= year_f:
+            fuente = fuentes[indice]
+            fecha_carga = tiempos_carga[indice]
+            frecuencia = frecuencias[indice]
+            estado = estados[indice]
+            unidad = unidades[indice]
+            producto = productos[indice]
+            
+            mapa_registro = lp.new_map(3, 0.5)
+            lp.put(mapa_registro, "load_time", fecha_carga)
+            lp.put(mapa_registro, "state_name", estado)
+            lp.put(mapa_registro, "index", indice)
+            
+            ar.add_last(registros, mapa_registro)
+            total_registros += 1
+            
+            if fuente == "SURVEY":
+                total_survey += 1
+            elif fuente == "CENSUS":
+                total_census += 1
+    
+    registros = ar.merge_sort(registros, sort_criteria_5)
+    registros_finales = ar.new_list()
+    
+    for registro in registros["elements"]:
+        idx = lp.get(registro, "index")
+        fila = [fuentes[idx], anios[idx], tiempos_carga[idx], frecuencias[idx], estados[idx], unidades[idx], productos[idx]]
+        ar.add_last(registros_finales, fila)
+    
+    end_time = time.time()
+    execution_time = (end_time - start_time) * 1000
+    
+    return execution_time, total_registros, total_survey, total_census, registros_finales
 
 
 def req_6(catalog):
