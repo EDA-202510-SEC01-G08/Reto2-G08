@@ -368,7 +368,7 @@ def sort_criteria_4(record1, record2):
 def req_5(catalog):
     """
     Retorna el resultado del requerimiento 5
-    """
+"""
     # TODO: Modificar el requerimiento 5
     pass
 
@@ -452,8 +452,7 @@ def req_7(catalog):
     Retorna el resultado del requerimiento 7
     """
     # TODO: Modificar el requerimiento 7
-    pass
-
+    
 
 def req_8(catalog):
     """
