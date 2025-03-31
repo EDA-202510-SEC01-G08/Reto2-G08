@@ -6,6 +6,7 @@ from DataStructures.Queue import queue as q
 from DataStructures.Stack import stack as st
 from DataStructures.Map import map_linear_probing as lp
 from DataStructures.Map import map_separate_chaining as sc
+import datetime as dt
 
 csv.field_size_limit(2147483647)
 
@@ -128,64 +129,82 @@ def req_4(catalog):
     pass
 
 
-def req_5(catalog,categoria, year_i, year_f):
+def req_5(catalog,category, year_i, year_f):
     """
     Retorna el resultado del requerimiento 5
 """
     # TODO: Modificar el requerimiento 5
-    start_time = time.time()
+    start_time = get_time()
     
     registros = ar.new_list()
+    index= 0
     total_survey = 0
     total_census = 0
     total_registros = 0
     
-    categorias = lp.get(catalog, "statical_category")["elements"]
-    anios = lp.get(catalog, "year_collection")["elements"]
-    fuentes = lp.get(catalog, "source")["elements"]
-    tiempos_carga = lp.get(catalog, "load_time")["elements"]
-    frecuencias = lp.get(catalog, "freq_collection")["elements"]
-    estados = lp.get(catalog, "state_name")["elements"]
-    unidades = lp.get(catalog, "unit_measurement")["elements"]
-    productos = lp.get(catalog, "commodity")["elements"]
+    list_categorias = lp.get(catalog, "statical_category")["elements"]
+    list_anios = lp.get(catalog, "year_collection")["elements"]
+    list_fuentes = lp.get(catalog, "source")["elements"]
+    list_tiempos_carga = lp.get(catalog, "load_time")["elements"]
+    lits_frecuencias = lp.get(catalog, "freq_collection")["elements"]
+    lits_estados = lp.get(catalog, "state_name")["elements"]
+    lits_unidades = lp.get(catalog, "unit_measurement")["elements"]
+    lits_productos = lp.get(catalog, "commodity")["elements"]
     
-    for indice in catalog["statical_category"]["elements"]:
-        categoria_actual = categorias[indice]
-        anio_actual = int(anios[indice])
+    for categoria in list_categorias:
+        categoria = categoria.replace(" ", "").upper()
+        anio_actual = int(ar.get_element(list_anios,index)).replace(" ", "").upper()
         
-        if categoria_actual == categoria and year_i <= anio_actual <= year_f:
-            fuente = fuentes[indice]
-            fecha_carga = tiempos_carga[indice]
-            frecuencia = frecuencias[indice]
-            estado = estados[indice]
-            unidad = unidades[indice]
-            producto = productos[indice]
-            
+        if categoria == category and year_i <= anio_actual <= year_f:
+            load_time = dt.strptime(ar.get_element(list_tiempos_carga,index), "%Y-%m-%d %H:%M:%S.%f")
+            state = ar.get_element(lits_estados,index).replace(" ", "").upper()
+            indice_record = index
+
             mapa_registro = lp.new_map(3, 0.5)
-            lp.put(mapa_registro, "load_time", fecha_carga)
-            lp.put(mapa_registro, "state_name", estado)
-            lp.put(mapa_registro, "index", indice)
-            
+            lp.put(mapa_registro, "load_time", load_time)
+            lp.put(mapa_registro, "state_name", state)
+            lp.put(mapa_registro, "index", indice_record)  
             ar.add_last(registros, mapa_registro)
             total_registros += 1
             
-            if fuente == "SURVEY":
+            if ar.get_element(list_fuentes,index) == "SURVEY":
                 total_survey += 1
-            elif fuente == "CENSUS":
+            elif ar.get_element(list_fuentes,index) == "CENSUS":
                 total_census += 1
+    index += 1
+
+    if total_registros == 0:
+        return None
     
-    registros = ar.merge_sort(registros, sort_criteria_5)
+    registros_sorteados = ar.merge_sort(registros, sort_criteria_4)
     registros_finales = ar.new_list()
+
+    for mapa in registros_sorteados["elements"]:
+        ar.add_last(registros_finales, lp.get(mapa,"index"))
+
+    resultados = ar.new_list()
     
-    for registro in registros["elements"]:
-        idx = lp.get(registro, "index")
-        fila = [fuentes[idx], anios[idx], tiempos_carga[idx], frecuencias[idx], estados[idx], unidades[idx], productos[idx]]
-        ar.add_last(registros_finales, fila)
+    for i in registros_sorteados["elements"]:
+        idx = lp.get(i, "index")
+        fila = [ar.get_element(list_fuentes,idx),
+                 ar.get_element(list_anios,idx), 
+                 ar.get_element(list_tiempos_carga,idx), 
+                 ar.get_element(lits_frecuencias,idx), 
+                 ar.get_element(lits_estados,idx), 
+                 ar.get_element(lits_unidades[idx], lits_productos,idx)]
+        ar.add_last(resultados, fila)
     
-    end_time = time.time()
-    execution_time = (end_time - start_time) * 1000
+    end_time = get_time()
+    delta = str(round(delta_time(start_time, end_time) ,2)) + " ms"
+
+    general = ar.new_list()
+    ar.add_last(general, delta)
+    ar.add_last(general, total_registros)  
+    ar.add_last(general, total_survey)
+    ar.add_last(general, total_census) 
+
     
-    return execution_time, total_registros, total_survey, total_census, registros_finales
+    return general, resultados
 
 
 def req_6(catalog):
