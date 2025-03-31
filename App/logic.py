@@ -196,13 +196,63 @@ def req_6(catalog):
     pass
 
 
-def req_7(catalog):
+def req_7(catalog, departamento, anio_inicio, anio_fin, orden):
     """
     Retorna el resultado del requerimiento 7
     """
     # TODO: Modificar el requerimiento 7
-    pass
-
+    start_time = time.time()
+    
+    ingresos_por_anio = {}
+    registros_validos = 0
+    total_survey = 0
+    total_census = 0
+    registros_invalidos = 0
+    
+    anios = lp.get(catalog, "year_collection")["elements"]
+    estados = lp.get(catalog, "state_name")["elements"]
+    fuentes = lp.get(catalog, "source")["elements"]
+    unidades = lp.get(catalog, "unit_measurement")["elements"]
+    ingresos = lp.get(catalog, "income")["elements"]
+    
+    for i in range(len(anios)):
+        if anio_inicio <= int(anios[i]) <= anio_fin and estados[i] == departamento and "$" in unidades[i]:
+            es_valido = all(c.isdigit() or c in ['.', '-'] for c in ingresos[i])
+            
+            if es_valido:
+                ingreso = float(ingresos[i])
+                if anios[i] not in ingresos_por_anio:
+                    ingresos_por_anio[anios[i]] = {"ingreso": 0, "registros": 0, "survey": 0, "census": 0}
+                ingresos_por_anio[anios[i]]["ingreso"] += ingreso
+                ingresos_por_anio[anios[i]]["registros"] += 1
+                if fuentes[i] == "SURVEY":
+                    ingresos_por_anio[anios[i]]["survey"] += 1
+                    total_survey += 1
+                elif fuentes[i] == "CENSUS":
+                    ingresos_por_anio[anios[i]]["census"] += 1
+                    total_census += 1
+                registros_validos += 1
+            else:
+                registros_invalidos += 1
+    
+    ingresos_ordenados = sorted(ingresos_por_anio.items(), key=lambda x: (-x[1]["ingreso"], -x[1]["registros"])) if orden == "DESCENDENTE" else sorted(ingresos_por_anio.items(), key=lambda x: (x[1]["ingreso"], -x[1]["registros"]))
+    
+    if len(ingresos_ordenados) > 15:
+        ingresos_ordenados = ingresos_ordenados[:5] + ingresos_ordenados[-5:]
+    
+    mayor_ingreso = ingresos_ordenados[0] if ingresos_ordenados else None
+    menor_ingreso = ingresos_ordenados[-1] if ingresos_ordenados else None
+    
+    resultados = ar.new_list()
+    for anio, datos in ingresos_ordenados:
+        categoria = "MAYOR" if mayor_ingreso and datos["ingreso"] == mayor_ingreso[1]["ingreso"] else ""
+        categoria += " MENOR" if menor_ingreso and datos["ingreso"] == menor_ingreso[1]["ingreso"] else ""
+        ar.add_last(resultados, [anio, categoria.strip(), datos["ingreso"], datos["registros"], registros_invalidos, datos["survey"], datos["census"]])
+    
+    end_time = time.time()
+    execution_time = (end_time - start_time) * 1000
+    
+    return execution_time, registros_validos, total_survey, total_census, resultados
 
 def req_8(catalog):
     """
