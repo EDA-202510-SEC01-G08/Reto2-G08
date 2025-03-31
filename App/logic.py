@@ -240,27 +240,36 @@ def req_3(catalog, año_i, año_f, departamento):
                 count_survey += 1
             elif ar.get_element(lista_fuente, i) == "CENSUS":
                 count_census += 1
-            lp.put(lista_un_dato, "source", ar.get_element(lista_fuente, i))
-            lp.put(lista_un_dato, "year_collection", ar.get_element(lista_años_collección, i))
+
             lp.put(lista_un_dato, "load_time", ar.get_element(lista_carga, i))
-            lp.put(lista_un_dato, "freq_collection", ar.get_element(lista_frecuencia, i))
-            lp.put(lista_un_dato, "commodity", ar.get_element(lista_producto, i))
-            lp.put(lista_un_dato, "unit_measurement", ar.get_element(lista_unidad, i))
             lp.put(lista_un_dato, "index", i)
 
             ar.add_last(lista_datos, lista_un_dato)
 
     if not ar.is_empty(lista_datos):
         lista_datos_sorted = ar.merge_sort(lista_datos, sort_criteria_3)
+        index_sorted = ar.new_list()
+        for j in lista_datos_sorted["elements"]:
+            ar.add_last(index_sorted, lp.get(j, "index"))
+        
+        lista_final = ar.new_list()
+        for z in index_sorted["elements"]:
+            ar.add_last(lista_final, ar.get_element(lista_fuente, z))
+            ar.add_last(lista_final, ar.get_element(lista_años_collección, z))
+            ar.add_last(lista_final, ar.get_element(lista_carga, z))
+            ar.add_last(lista_final, ar.get_element(lista_frecuencia, z))
+            ar.add_last(lista_final, ar.get_element(lista_producto, z))
+            ar.add_last(lista_final, ar.get_element(lista_unidad, z))
+            ar.add_last(lista_final, ar.get_element(lista_fuente, z))
 
-        if ar.size(lista_datos_sorted) <= 20:
-            ar.add_last(lista_datos_sorted, [count_total, count_survey, count_census])
-            result = lista_datos_sorted
+        if ar.size(lista_final) <= 20:
+            ar.add_last(lista_final, [count_total, count_survey, count_census])
+            result = lista_final
 
         else:
             recortada = ar.new_list()
             for i in range(-5,5):
-                ar.add_last(recortada, ar.get_element(lista_datos_sorted, i))
+                ar.add_last(recortada, ar.get_element(lista_final, i))
             ar.add_last(recortada, [count_total, count_survey, count_census])
             result = recortada
    
