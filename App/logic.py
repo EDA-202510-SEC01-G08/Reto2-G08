@@ -109,25 +109,23 @@ def req_1(catalog, year):
     count = 0
     index_mayor = 0
 
+    list_load_time = lp.get(catalog, "load_time")
+    list_year = lp.get(catalog, "year_collection")
+
     fecha_mayor = None
 
-    for year_lista in lp.get(catalog, "year_collection")["elements"]:
+    for year_lista in list_year["elements"]:
         int_year = int(year_lista.replace(" ", ""))
 
         if int_year == year:
 
-            if fecha_mayor is None:
-
-                fecha_mayor = ar.get_element(lp.get(catalog, "load_time"), index)
-                fecha_mayor_dt = dt.strptime(fecha_mayor, "%m/%d/%Y %H:%M")
-                index_mayor = index
-
-            fecha_year = ar.get_element(lp.get(catalog, "load_time"), index)
+            fecha_year = ar.get_element(list_load_time, index)
             fecha_year_dt = dt.strptime(fecha_year, "%m/%d/%Y %H:%M")
             count += 1
 
-            if fecha_year_dt >= fecha_mayor_dt: # por >= retorna el último
-                fecha_mayor = ar.get_element(lp.get(catalog, "load_time"), index)
+            if fecha_mayor is None or fecha_year_dt >= fecha_mayor_dt: # por >= retorna el último
+
+                fecha_mayor = ar.get_element(list_load_time, index)
                 fecha_mayor_dt = dt.strptime(fecha_mayor, "%m/%d/%Y %H:%M")
                 index_mayor = index
 
@@ -136,15 +134,23 @@ def req_1(catalog, year):
     if fecha_mayor is None:
         return None 
     
+    list_source = lp.get(catalog, "source")
+    list_freq = lp.get(catalog, "freq_collection")
+    list_state = lp.get(catalog, "state_name")
+    list_commodity = lp.get(catalog, "commodity")
+    list_unit = lp.get(catalog, "unit_measurement")
+    list_value = lp.get(catalog, "value")
+
+
     datos_mayor = ar.new_list()
-    ar.add_last(datos_mayor,ar.get_element(lp.get(catalog, "year_collection"), index_mayor))
-    ar.add_last(datos_mayor,ar.get_element(lp.get(catalog, "load_time"), index_mayor))
-    ar.add_last(datos_mayor,ar.get_element(lp.get(catalog, "source"), index_mayor))
-    ar.add_last(datos_mayor,ar.get_element(lp.get(catalog, "freq_collection"), index_mayor))
-    ar.add_last(datos_mayor,ar.get_element(lp.get(catalog, "state_name"), index_mayor))
-    ar.add_last(datos_mayor,ar.get_element(lp.get(catalog, "commodity"), index_mayor))
-    ar.add_last(datos_mayor,ar.get_element(lp.get(catalog, "unit_measurement"), index_mayor))
-    ar.add_last(datos_mayor,ar.get_element(lp.get(catalog, "value"), index_mayor))
+    ar.add_last(datos_mayor,ar.get_element(list_year, index_mayor))
+    ar.add_last(datos_mayor,ar.get_element(list_load_time, index_mayor))
+    ar.add_last(datos_mayor,ar.get_element(list_source, index_mayor))
+    ar.add_last(datos_mayor,ar.get_element(list_freq, index_mayor))
+    ar.add_last(datos_mayor,ar.get_element(list_state, index_mayor))
+    ar.add_last(datos_mayor,ar.get_element(list_commodity, index_mayor))
+    ar.add_last(datos_mayor,ar.get_element(list_unit, index_mayor))
+    ar.add_last(datos_mayor,ar.get_element(list_value, index_mayor))
 
     end_time = get_time()
     delta = str(round(delta_time(start_time, end_time),2)) + " ms"
@@ -156,17 +162,36 @@ def req_1(catalog, year):
     return general, datos_mayor
 
 def req_2(catalog, state, N):
+
     start_time = get_time()
-    mapa_tiempos = lp.new_map(ar.size(lp.get(catalog, "state_name")), 0.5) # q uso como size?????
+
+    records = ar.new_list()
+
     index = 0
     count = 0
-    for estado in lp.get(catalog, "state_name")["elements"]:
+    list_year = lp.get(catalog, "year_collection")
+    list_load_time = lp.get(catalog, "load_time")
+    list_source = lp.get(catalog, "source")
+    list_freq = lp.get(catalog, "freq_collection")
+    list_state = lp.get(catalog, "state_name")
+    list_commodity = lp.get(catalog, "commodity")
+    list_unit = lp.get(catalog, "unit_measurement")
+    list_value = lp.get(catalog, "value")
+
+
+    for estado in list_state["elements"]:
         estadom = estado.replace(" ", "").upper()
         if estadom == state:
-            load_time_date = dt.strptime(ar.get_element(lp.get(catalog, "load_time"), index),"%m/%d/%Y %H:%M")
-            if lp.contains(mapa_tiempos, load_time_date) is False:
-                lp.put(mapa_tiempos, load_time_date, ar.new_list())
-            ar.add_last(lp.get(mapa_tiempos, load_time_date), index)
+            load_time_date = dt.strptime(ar.get_element(list_load_time, index),"%m/%d/%Y %H:%M")
+            estado_record = ar.get_element(list_state, index)
+            indice_record = index
+
+            map_record = lp.new_map(3, 0.5)
+            lp.put(map_record, "load_time", load_time_date)
+            lp.put(map_record, "state_name", estado_record)
+            lp.put(map_record, "index", indice_record)
+            ar.add_last(records, map_record)
+
             count += 1
         index += 1
     
@@ -175,32 +200,29 @@ def req_2(catalog, state, N):
     if count == 0:
         return None
     
-    tiempos = lp.key_set(mapa_tiempos)
-    sorted_times = ar.merge_sort(tiempos, ar.default_sort_criteria)
+    if N > ar.size(records): 
+        N = count
+    
+    sorted_records = ar.merge_sort(records, sort_criteria_4) #sirve el mismo
+    sorted_indices = ar.new_list()
 
-    sorted_indices = []
-    #sorted_indices = ar.new_list()
+    for i in range(-N,0):
 
-    for load_time in sorted_times["elements"]:
-        indices = lp.get(mapa_tiempos, load_time)
-        sorted_indices_i = ar.merge_sort_indice(indices, ar.sort_states_indices, catalog) # este resulta innecesario    
-                                                                                  #considerando que los nombres de los estados son iguales
-        sorted_indices.extend(sorted_indices_i["elements"])
-        #for idx in sorted_indices_i["elements"]: #Que hago???????????
-           # ar.add_last(sorted_indices, idx)
+        ar.add_last(sorted_indices, lp.get(ar.get_element(sorted_records,i), "index"))
 
     result = ar.new_list()
-    for idx in sorted_indices[-N:]:
+    for idx in sorted_indices["elements"]:
         record = [] # puedo usar una lista de las creadas pero me toca volver a iterar en el view
-        record.append(ar.get_element(lp.get(catalog, "year_collection"), idx))
-        record.append(ar.get_element(lp.get(catalog, "load_time"), idx))
-        record.append(ar.get_element(lp.get(catalog, "source"), idx))
-        record.append(ar.get_element(lp.get(catalog, "freq_collection"), idx))
-        record.append(ar.get_element(lp.get(catalog, "state_name"), idx))
-        record.append(ar.get_element(lp.get(catalog, "commodity"), idx))
-        record.append(ar.get_element(lp.get(catalog, "unit_measurement"), idx))
-        record.append(ar.get_element(lp.get(catalog, "value"), idx))
+        record.append(ar.get_element(list_year, idx))
+        record.append(ar.get_element(list_load_time, idx))
+        record.append(ar.get_element(list_source, idx))
+        record.append(ar.get_element(list_freq, idx))
+        record.append(ar.get_element(list_state, idx))
+        record.append(ar.get_element(list_commodity, idx))
+        record.append(ar.get_element(list_unit, idx))
+        record.append(ar.get_element(list_value, idx))
         ar.add_last(result, record)
+
 
     end_time = get_time()
     delta = str(round(delta_time(start_time, end_time), 2)) + " ms"
