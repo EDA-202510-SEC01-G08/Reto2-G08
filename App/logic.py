@@ -365,7 +365,7 @@ def sort_criteria_4(record1, record2):
     else:
         return False
 
-def req_5(catalog):
+def req_5(catalog, category, year_i, year_f):
     """
     Retorna el resultado del requerimiento 5
 """
@@ -378,21 +378,21 @@ def req_5(catalog):
     total_census = 0
     total_registros = 0
     
-    list_categorias = lp.get(catalog, "statical_category")["elements"]
-    list_anios = lp.get(catalog, "year_collection")["elements"]
-    list_fuentes = lp.get(catalog, "source")["elements"]
-    list_tiempos_carga = lp.get(catalog, "load_time")["elements"]
-    lits_frecuencias = lp.get(catalog, "freq_collection")["elements"]
-    lits_estados = lp.get(catalog, "state_name")["elements"]
-    lits_unidades = lp.get(catalog, "unit_measurement")["elements"]
-    lits_productos = lp.get(catalog, "commodity")["elements"]
+    list_categorias = lp.get(catalog, "statical_category")
+    list_anios = lp.get(catalog, "year_collection")
+    list_fuentes = lp.get(catalog, "source")
+    list_tiempos_carga = lp.get(catalog, "load_time")
+    lits_frecuencias = lp.get(catalog, "freq_collection")
+    lits_estados = lp.get(catalog, "state_name")
+    lits_unidades = lp.get(catalog, "unit_measurement")
+    lits_productos = lp.get(catalog, "commodity")
     
-    for categoria in list_categorias:
+    for categoria in list_categorias["elements"]:
         categoria = categoria.replace(" ", "").upper()
-        anio_actual = int(ar.get_element(list_anios,index)).replace(" ", "").upper()
+        anio_actual = int((ar.get_element(list_anios,index)).replace(" ", ""))
         
         if categoria == category and year_i <= anio_actual <= year_f:
-            load_time = dt.strptime(ar.get_element(list_tiempos_carga,index), "%Y-%m-%d %H:%M:%S.%f")
+            load_time = dt.strptime(ar.get_element(list_tiempos_carga,index), "%Y-%m-%d %H:%M:%S")
             state = ar.get_element(lits_estados,index).replace(" ", "").upper()
             indice_record = index
 
@@ -407,7 +407,7 @@ def req_5(catalog):
                 total_survey += 1
             elif ar.get_element(list_fuentes,index) == "CENSUS":
                 total_census += 1
-    index += 1
+        index += 1
 
     if total_registros == 0:
         return None
@@ -427,7 +427,8 @@ def req_5(catalog):
                  ar.get_element(list_tiempos_carga,idx), 
                  ar.get_element(lits_frecuencias,idx), 
                  ar.get_element(lits_estados,idx), 
-                 ar.get_element(lits_unidades[idx], lits_productos,idx)]
+                 ar.get_element(lits_unidades,idx), 
+                 ar.get_element(lits_productos,idx)]
         ar.add_last(resultados, fila)
     
     end_time = get_time()
