@@ -285,7 +285,7 @@ def req_7(catalog, departamento, anio_inicio, anio_fin, orden):
     start_time = get_time()
 
     # Crear un mapa para almacenar la información de ingresos por año
-    mapa_years = lp.new_map(anio_fin - anio_inicio + 1, 0.5)
+    mapa_years = lp.new_map(anio_fin - anio_inicio , 0.5)
 
     # Contadores para estadísticas finales
     registros_validos = 0
@@ -366,11 +366,11 @@ def req_7(catalog, departamento, anio_inicio, anio_fin, orden):
 
     # Medir el tiempo de ejecución
     end_time = get_time()
-    execution_time = delta_time(start_time, end_time)
+    delta = str(round(delta_time(start_time, end_time) ,2)) + " ms"
 
     # Retornar los resultados en orden
     # el return no se como hacerlo con listas tocaria cambiar algunas cosas
-    return execution_time,registros_validos ,registros_invalidos, sorted_years, mayor_ingreso, menor_ingreso, registros_validos, registros_invalidos, total_survey, total_census
+    return delta,registros_validos ,registros_invalidos, sorted_years, mayor_ingreso, menor_ingreso, registros_validos, registros_invalidos, total_survey, total_census
 
 
 def sort_criteria_7(anio1, anio2):
