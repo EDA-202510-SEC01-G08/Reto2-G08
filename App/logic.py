@@ -389,35 +389,48 @@ def req6(catalog, departamento, año_i, año_f):
 
     for i in range(size):
         if ar.get_element(lista_carga, i) >= str(año_i) and ar.get_element(lista_carga, i) <= str(año_f) and ar.get_element(lista_departamento, i) == departamento:
-            lista_un_dato = ar.new_list()
+            load_time = dt.strptime(ar.get_element(lista_carga, i), "%Y-%m-%d %H:%M:%S")
+            estado = ar.get_element(lista_departamento, i)
+            mapa_aux = lp.new_map(2, 0.5)
+            lp.put(mapa_aux, "load_time", load_time)
+            lp.put(mapa_aux, "index", i)
+
+            ar.add_last(lista_datos, mapa_aux)
+
             count_total += 1 
             if ar.get_element(lista_fuente, i) == "SURVEY":
                 count_survey += 1
             elif ar.get_element(lista_fuente, i) == "CENSUS":
                 count_census += 1
-            ar.add_last(lista_un_dato, ar.get_element(lista_fuente, i))
-            ar.add_last(lista_un_dato, ar.get_element(lista_años_collección, i))
-            ar.add_last(lista_un_dato, ar.get_element(lista_carga, i))
-            ar.add_last(lista_un_dato, ar.get_element(lista_frecuencia, i))
-            ar.add_last(lista_un_dato, ar.get_element(lista_producto, i))
-            ar.add_last(lista_un_dato, ar.get_element(lista_unidad, i))
-            ar.add_last(lista_un_dato, ar.get_element(lista_departamento, i))
 
-            ar.add_last(lista_datos, lista_un_dato)
+    if not ar.is_empty(lista_datos):
+        lista_datos_sorted = ar.merge_sort(lista_datos, sort_criteria_6)
+        index_sorted = ar.new_list()
 
-    ar.shell_sort(lista_datos, sort_criteria_6)
+        for j in lista_datos_sorted["elements"]:
+            ar.add_last(index_sorted, lp.get(j, "index"))
+    
+        lista_final = ar.new_list()
+        for z in index_sorted["elements"]:
+            ar.add_last(lista_final, ar.get_element(lista_fuente, z))
+            ar.add_last(lista_final, ar.get_element(lista_años_collección, z))
+            ar.add_last(lista_final, ar.get_element(lista_carga, z))
+            ar.add_last(lista_final, ar.get_element(lista_frecuencia, z))
+            ar.add_last(lista_final, ar.get_element(lista_departamento, z))
+            ar.add_last(lista_final, ar.get_element(lista_unidad, z))
+            ar.add_last(lista_final, ar.get_element(lista_producto, z))
 
-    if ar.is_empty(lista_datos):
+    else:
         result = None
     
-    elif ar.size(lista_datos) <= 20:
-        ar.add_last(lista_datos, [count_total, count_survey, count_census])
-        result = lista_datos
+    if ar.size(lista_final) <= 20:
+        ar.add_last(lista_final, [count_total, count_survey, count_census])
+        result = lista_final
 
     else:
         recortada = ar.new_list()
         for i in range(-5,5):
-            ar.add_last(recortada, ar.get_element(lista_datos, i))
+            ar.add_last(recortada, ar.get_element(lista_final, i))
         ar.add_last(recortada, [count_total, count_survey, count_census])
         result = recortada
     end_time = get_time()
@@ -425,9 +438,11 @@ def req6(catalog, departamento, año_i, año_f):
     print("\nTiempo" + str(time) + "ms")
     return result
 
-def sort_criteria_6(año_1, año_2):
+def sort_criteria_6(fecha_1, fecha_2):
     is_sorted = False
-    if año_1["load_time"][:10] > año_2["load_time"][:10]:
+    load_time_1 = lp.get(fecha_1, "load_time")
+    load_time_2 = lp.get(fecha_2, "load_time")
+    if load_time_1 < load_time_2:
         is_sorted = True
     return is_sorted
 
