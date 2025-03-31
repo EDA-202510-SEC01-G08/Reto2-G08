@@ -518,7 +518,7 @@ def sort_criteria_6(fecha_1, fecha_2):
     return is_sorted
 
 
-def req_7(catalog):
+def req_7(catalog, departamento, anio_inicio, anio_fin, orden):
     """
     Retorna el resultado del requerimiento 7
     """
