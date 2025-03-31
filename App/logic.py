@@ -233,44 +233,53 @@ def req_3(catalog, año_i, año_f, departamento):
 
     for i in range(size):
         if ar.get_element(lista_años_collección, i) >= año_i and ar.get_element(lista_años_collección, i) <= año_f and ar.get_element(lista_departamento, i) == departamento:
-            lista_un_dato = ar.new_list()
+            print("A VER SI ESTA COSA FUNCIONA")
+            lista_un_dato = lp.new_map(2, 0.5)
             count_total += 1 
             if ar.get_element(lista_fuente, i) == "SURVEY":
                 count_survey += 1
             elif ar.get_element(lista_fuente, i) == "CENSUS":
                 count_census += 1
-            ar.add_last(lista_un_dato, ar.get_element(lista_fuente, i))
-            ar.add_last(lista_un_dato, ar.get_element(lista_años_collección, i))
-            ar.add_last(lista_un_dato, ar.get_element(lista_carga, i))
-            ar.add_last(lista_un_dato, ar.get_element(lista_frecuencia, i))
-            ar.add_last(lista_un_dato, ar.get_element(lista_producto, i))
-            ar.add_last(lista_un_dato, ar.get_element(lista_unidad, i))
+            lp.put(lista_un_dato, "source", ar.get_element(lista_fuente, i))
+            lp.put(lista_un_dato, "year_collection", ar.get_element(lista_años_collección, i))
+            lp.put(lista_un_dato, "load_time", ar.get_element(lista_carga, i))
+            lp.put(lista_un_dato, "freq_collection", ar.get_element(lista_frecuencia, i))
+            lp.put(lista_un_dato, "commodity", ar.get_element(lista_producto, i))
+            lp.put(lista_un_dato, "unit_measurement", ar.get_element(lista_unidad, i))
+            lp.put(lista_un_dato, "index", i)
 
             ar.add_last(lista_datos, lista_un_dato)
 
-    ar.shell_sort(lista_datos, sort_criteria_3)
+    if not ar.is_empty(lista_datos):
+        lista_datos_sorted = ar.merge_sort(lista_datos, sort_criteria_3)
 
-    if ar.is_empty(lista_datos):
+        if ar.size(lista_datos_sorted) <= 20:
+            ar.add_last(lista_datos_sorted, [count_total, count_survey, count_census])
+            result = lista_datos_sorted
+
+        else:
+            recortada = ar.new_list()
+            for i in range(-5,5):
+                ar.add_last(recortada, ar.get_element(lista_datos_sorted, i))
+            ar.add_last(recortada, [count_total, count_survey, count_census])
+            result = recortada
+   
+
+    elif ar.is_empty(lista_datos):
         result = None
     
-    elif ar.size(lista_datos) <= 20:
-        ar.add_last(lista_datos, [count_total, count_survey, count_census])
-        result = lista_datos
-
-    else:
-        recortada = ar.new_list()
-        for i in range(-5,5):
-            ar.add_last(recortada, ar.get_element(lista_datos, i))
-        ar.add_last(recortada, [count_total, count_survey, count_census])
-        result = recortada
+    print(result)
+    
     end_time = get_time()
     time = delta_time(start_time, end_time)
-    print("\nTiempo" + str(time) + "ms")
+    print("\nTiempo " + str(time) + " ms")
     return result
 
-def sort_criteria_3(año_1, año_2):
+def sort_criteria_3(fecha_1, fecha_2):
     is_sorted = False
-    if año_1[:10] > año_2[:10]:
+    load_time_1 = lp.get(fecha_1, "load_time")
+    load_time_2 = lp.get(fecha_2, "load_time")
+    if load_time_1 > load_time_2[:10]:
         is_sorted = True
     return is_sorted
 
@@ -390,7 +399,6 @@ def req6(catalog, departamento, año_i, año_f):
     for i in range(size):
         if ar.get_element(lista_carga, i) >= str(año_i) and ar.get_element(lista_carga, i) <= str(año_f) and ar.get_element(lista_departamento, i) == departamento:
             load_time = dt.strptime(ar.get_element(lista_carga, i), "%Y-%m-%d %H:%M:%S")
-            estado = ar.get_element(lista_departamento, i)
             mapa_aux = lp.new_map(2, 0.5)
             lp.put(mapa_aux, "load_time", load_time)
             lp.put(mapa_aux, "index", i)
@@ -406,7 +414,7 @@ def req6(catalog, departamento, año_i, año_f):
     if not ar.is_empty(lista_datos):
         lista_datos_sorted = ar.merge_sort(lista_datos, sort_criteria_6)
         index_sorted = ar.new_list()
-
+        print(lista_datos_sorted)
         for j in lista_datos_sorted["elements"]:
             ar.add_last(index_sorted, lp.get(j, "index"))
     

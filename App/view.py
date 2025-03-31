@@ -28,7 +28,7 @@ def load_data(control):
     file_path = f"Data/{file}" 
     
     data = lg.load_data(control, file_path)
-
+    print(data)
     headers_generales = ["Tiempo de carga", "N° de registros", "Año min", "Año max"]
     print(tb.tabulate([data[0]["elements"]], headers_generales, tablefmt="pretty"))    
     print(f"\nLos primeros 5 registros son:\n")
@@ -46,6 +46,7 @@ def print_req_1(control):
     yearss = int(input_year.replace(" ", ""))
 
     result = lg.req_1(control, yearss)
+    print(result)
 
     if result is None:
         print(f"\nNo se encontraron registros para el año {yearss}.")
@@ -65,6 +66,8 @@ def print_req_2(control):
     statesm = statess.upper()
     input_N = input("\nIngrese el número de registros que quiere listar: ")
     N = int(input_N.replace(" ", ""))
+    result = lg.req_2(control, statesm, N)
+    print(result)
 
     if N == 0:
         print("\nEl número de registros no puede ser 0.")
@@ -97,22 +100,18 @@ def print_req_3(control):
     estado_1 = estado.replace(" ", "")
     estado_2 = estado_1.upper()
 
-    result = lg.req3(control, estado_2, año_i, año_f)
+    result = lg.req_3(control, año_i, año_f, estado_2)
     if result == None:
-        print("\nNo se encontraron registos en el estado {estado_2} entre los años {año_i} - {año_f}")
+        print(f"\nNo se encontraron registos en el estado {estado_2} entre los años {año_i} - {año_f}")
     else:
         headers = ["Fuente", "Año de recolección", "Fecha de carga", "Frecuencia de recolección", "Producto", "Unidad de medición"]
 
         if ar.size(result) <= 20:
-            print("\nLos registros tomados en el estado {estado_2} dentro del rango de años {año_i} - {año_f} son:\n")
+            print(f"\nLos registros tomados en el estado {estado_2} dentro del rango de años {año_i} - {año_f} son:\n")
             print(tb.tabulate(result["elements"], headers, tablefmt="pretty"))
         else:
-            primeros_5 = ar.sub_list(result, 0, 5)
-            ultimos_5 = ar.sub_list(result, -5, 5)
-            print("\nLos primeros 5 registros tomados en el estado {estado_2} dentro del rango de años {año_i} - {año_f} son:\n")
-            print(tb.tabulate(primeros_5["elements"], headers, tablefmt="pretty"))
-            print("\nLos últimos 5 registros tomados en el estado {estado_2} dentro del rango de años {año_i} - {año_f} son:\n")
-            print(tb.tabulate(ultimos_5["elements"], headers, tablefmt="pretty"))
+            print(f"\nLos últimos 5 registros y los primers registros (respectivamente) que fueron tomados en el estado {estado_2} dentro del rango de años {año_i} - {año_f} son")
+            print(tb.tabulate(result["elements"], headers, tablefmt="pretty"))
 
 
 def print_req_4(control):
@@ -178,21 +177,21 @@ def print_req_6(control):
     estado_1 = estado.replace(" ", "")
     estado_2 = estado_1.upper()
 
-    result = lg.req3(control, estado_2, fecha_i, fecha_f)
+    result = lg.req6(control, estado_2, fecha_i, fecha_f)
     if result == None:
-        print("\nNo se encontraron registos en el estado {estado_2} entre los años {fecha_i} - {fecha_f}")
+        print(f"\nNo se encontraron registos en el estado {estado_2} entre los años {fecha_i} - {fecha_f}")
     else:
         headers = ["Fuente", "Año de recolección", "Fecha de carga", "Frecuencia de recolección", "Estado", "Unidad de medición", "Producto"]
 
         if ar.size(result) <= 20:
-            print("\nLos registros tomados en el estado {estado_2} dentro del rango de años {fecha_i} - {fecha_f} son:\n")
+            print(f"\nLos registros tomados en el estado {estado_2} dentro del rango de años {fecha_i} - {fecha_f} son:\n")
             print(tb.tabulate(result["elements"], headers, tablefmt="pretty"))
         else:
             primeros_5 = ar.sub_list(result, 0, 5)
             ultimos_5 = ar.sub_list(result, -5, 5)
-            print("\nLos primeros 5 registros tomados en el estado {estado_2} dentro del rango de años {fecha_i} - {fecha_f} son:\n")
+            print(f"\nLos primeros 5 registros tomados en el estado {estado_2} dentro del rango de años {fecha_i} - {fecha_f} son:\n")
             print(tb.tabulate(primeros_5["elements"], headers, tablefmt="pretty"))
-            print("\nLos últimos 5 registros tomados en el estado {estado_2} dentro del rango de años {fecha_i} - {fecha_f} son:\n")
+            print(f"\nLos últimos 5 registros tomados en el estado {estado_2} dentro del rango de años {fecha_i} - {fecha_f} son:\n")
             print(tb.tabulate(ultimos_5["elements"], headers, tablefmt="pretty"))
 
 
