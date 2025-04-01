@@ -105,7 +105,7 @@ def print_req_3(control):
     # TODO: Imprimir el resultado del requerimiento 3
     año_i = input("\nIngresa el año inicial del filtro: ")
     año_f = input("\nIngrese el año final del filtro: ")
-    estado = input("Ingrese el estado por el cual desea filtrar: ")
+    estado = input("\nIngrese el estado por el cual desea filtrar: ")
     estado_1 = estado.replace(" ", "")
     estado_2 = estado_1.upper()
 
@@ -113,21 +113,22 @@ def print_req_3(control):
     if result[1] == None:
         print(f"\nNo se encontraron registos en el estado {estado_2} entre los años {año_i} - {año_f}")
     else:
+        headers_general = ["Tiempo (ms)", "Total", "Survey", "Census"]
+        print(tb.tabulate([result[0]["elements"]], headers_general, tablefmt="pretty"))
         headers = ["Fuente", "Año de recolección", "Fecha de carga", "Frecuencia de recolección", "Producto", "Unidad de medición"]
 
         if ar.size(result[1]) <= 20:
             print(f"\nLos registros tomados en el estado {estado_2} dentro del rango de años {año_i} - {año_f} son:\n")
-            print(tb.tabulate(result[1]["elements"][:-1], headers, tablefmt="pretty"))
-            print("\nEl número de registros que cumplen el filtro y tienen como fuente 'survey' son: " + str(result[0]["elements"][2]))
-            print("El número de registros que cumplen el filtro y tienen como fuente 'census' son: " + str(result[0]["elements"][3]))
-            print("El total de registros que cumplen el filtro son: " + str(result[0]["elements"][1]))
-            print("El tiempo que tarda el requerimiento en realizarse es: " + str(result[0]["elements"][0]))
+            print(tb.tabulate(result[1]["elements"], headers, tablefmt="pretty"))
         else:
-            print(f"\nLos últimos 5 registros y los primers registros (respectivamente) que fueron tomados en el estado {estado_2} dentro del rango de años {año_i} - {año_f} son")
-            print(tb.tabulate(result[1]["elements"][:-1], headers, tablefmt="pretty"))
-            print("\nEl número de registros que cumplen el filtro y tienen como fuente 'survey' son: " + str(result[0]["elements"][2]))
-            print("El número de registros que cumplen el filtro y tienen como fuente 'census' son: " + str(result[0]["elements"][3]))
-            print("El total de registros que cumplen el filtro son: " + str(result[0]["elements"][1]))
+            primeros_5 = ar.sub_list(result[1], ar.size(result[1])-5, 5)
+            ultimos_5 = ar.sub_list(result[1], 0, 5)
+
+            print(f"\nLos primeros 5 resgistros tomados en el estado {estado_2} en el rango de años {año_i} - {año_f} son: ")
+            print(tb.tabulate(ultimos_5["elements"], headers, tablefmt="pretty"))
+            print(f"\nLos últimos 5 resgistros tomados en el estado {estado_2} en el rango de años {año_i} - {año_f} son: ")
+            print(tb.tabulate(primeros_5["elements"], headers, tablefmt="pretty"))
+
 
 
 def print_req_4(control):
@@ -246,11 +247,16 @@ def print_req_6(control):
             print("El total de registros que cumplen el filtro son: " + str(result["elements"][-1][0]))
 
         else:
-            print(f"\nLos últimos 5 registros y los primeros 5 registros (respectivamente) que fueron tomados en el estado {estado_2} dentro del rango de años {fecha_i} - {fecha_f} son: ")
-            print(tb.tabulate(result["elements"][:-1], headers, tablefmt="pretty"))
+            primeros_5 = ar.sub_list(result, ar.size(result)-6, 5)
+            ultimos_5 = ar.sub_list(result, 0, 5)
+            print(f"\nLos primeros 5 registros que tienen como statical_category {estado_2} y están en el rango de años {fecha_i} - {fecha_f} son:\n")
+            print(tb.tabulate(ultimos_5["elements"], headers, tablefmt="pretty"))
+            print(f"\nLos últimos 5 registros que tienen como statical_category {estado_2} y están en el rango de años {fecha_i} - {fecha_f} son:\n")
+            print(tb.tabulate(primeros_5["elements"], headers, tablefmt="pretty"))
             print("\nEl número de registros que cumplen el filtro y tienen como fuente 'survey' son: " + str(result["elements"][-1][1]))
             print("El número de registros que cumplen el filtro y tienen como fuente 'census' son: " + str(result["elements"][-1][2]))
             print("El total de registros que cumplen el filtro son: " + str(result["elements"][-1][0]))
+
 
 
 

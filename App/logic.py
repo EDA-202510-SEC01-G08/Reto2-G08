@@ -289,16 +289,7 @@ def req_3(catalog, año_i, año_f, departamento):
             lista_un_dato.append(ar.get_element(lista_unidad, z))
 
             ar.add_last(lista_final, lista_un_dato)
-        if ar.size(lista_final) <= 20:
-            ar.add_last(lista_final, [count_total, count_survey, count_census])
-            result = lista_final
-
-        else:
-            recortada = ar.new_list()
-            for i in range(-5,5):
-                ar.add_last(recortada, ar.get_element(lista_final, i))
-            ar.add_last(recortada, [count_total, count_survey, count_census])
-            result = recortada
+        
 
     end_time = get_time()
     time = str(round(delta_time(start_time, end_time), 2)) + " ms"
@@ -309,13 +300,13 @@ def req_3(catalog, año_i, año_f, departamento):
     ar.add_last(general, count_survey)
     ar.add_last(general, count_census)
 
-    return general, result
+    return general, lista_final
 
 def sort_criteria_3(fecha_1, fecha_2):
     is_sorted = False
     load_time_1 = lp.get(fecha_1, "load_time") 
     load_time_2 = lp.get(fecha_2, "load_time")
-    if load_time_1 < load_time_2:
+    if load_time_1 > load_time_2:
         is_sorted = True
     return is_sorted
 
@@ -542,30 +533,21 @@ def req6(catalog, departamento, año_i, año_f):
             lista_un_dato.append(ar.get_element(lista_producto, z))
 
             ar.add_last(lista_final, lista_un_dato)
-        if ar.size(lista_final) <= 20:
-            ar.add_last(lista_final, [count_total, count_survey, count_census])
-            result = lista_final
-
-        else:
-            recortada = ar.new_list()
-            for i in range(-5,5):
-                ar.add_last(recortada, ar.get_element(lista_final, i))
-            ar.add_last(recortada, [count_total, count_survey, count_census])
-            result = recortada
+        
     else:
-        result = None
+        lista_final = None
     
-    
+    ar.add_last(lista_final, [count_survey, count_census, count_total])
     end_time = get_time()
     time = delta_time(start_time, end_time)
-    print("\nTiempo: " + str(time) + "ms")
-    return result
+    print("\nTiempo: " + str(time) + " ms")
+    return lista_final
 
 def sort_criteria_6(fecha_1, fecha_2):
     is_sorted = False
     load_time_1 = lp.get(fecha_1, "load_time")
     load_time_2 = lp.get(fecha_2, "load_time")
-    if load_time_1 < load_time_2:
+    if load_time_1 > load_time_2:
         is_sorted = True
     return is_sorted
 
