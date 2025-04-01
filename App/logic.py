@@ -261,7 +261,6 @@ def req_3(catalog, año_i, año_f, departamento):
             lista_un_dato.append(ar.get_element(lista_frecuencia, z))
             lista_un_dato.append(ar.get_element(lista_producto, z))
             lista_un_dato.append(ar.get_element(lista_unidad, z))
-            lista_un_dato.append(ar.get_element(lista_fuente, z))
 
             ar.add_last(lista_final, lista_un_dato)
 
