@@ -254,13 +254,16 @@ def req_3(catalog, año_i, año_f, departamento):
         
         lista_final = ar.new_list()
         for z in index_sorted["elements"]:
-            ar.add_last(lista_final, ar.get_element(lista_fuente, z))
-            ar.add_last(lista_final, ar.get_element(lista_años_collección, z))
-            ar.add_last(lista_final, ar.get_element(lista_carga, z))
-            ar.add_last(lista_final, ar.get_element(lista_frecuencia, z))
-            ar.add_last(lista_final, ar.get_element(lista_producto, z))
-            ar.add_last(lista_final, ar.get_element(lista_unidad, z))
-            ar.add_last(lista_final, ar.get_element(lista_fuente, z))
+            lista_un_dato = []
+            lista_un_dato.append(ar.get_element(lista_fuente, z))
+            lista_un_dato.append(ar.get_element(lista_años_collección, z))
+            lista_un_dato.append(ar.get_element(lista_carga, z))
+            lista_un_dato.append(ar.get_element(lista_frecuencia, z))
+            lista_un_dato.append(ar.get_element(lista_producto, z))
+            lista_un_dato.append(ar.get_element(lista_unidad, z))
+            lista_un_dato.append(ar.get_element(lista_fuente, z))
+
+            ar.add_last(lista_final, lista_un_dato)
 
         if ar.size(lista_final) <= 20:
             ar.add_last(lista_final, [count_total, count_survey, count_census])
@@ -276,9 +279,6 @@ def req_3(catalog, año_i, año_f, departamento):
 
     elif ar.is_empty(lista_datos):
         result = None
-    
-    print(result)
-    
     end_time = get_time()
     time = delta_time(start_time, end_time)
     print("\nTiempo " + str(time) + " ms")
@@ -288,7 +288,7 @@ def sort_criteria_3(fecha_1, fecha_2):
     is_sorted = False
     load_time_1 = lp.get(fecha_1, "load_time")
     load_time_2 = lp.get(fecha_2, "load_time")
-    if load_time_1 > load_time_2[:10]:
+    if load_time_1 > load_time_2:
         is_sorted = True
     return is_sorted
 
@@ -494,19 +494,21 @@ def req6(catalog, departamento, año_i, año_f):
     if not ar.is_empty(lista_datos):
         lista_datos_sorted = ar.merge_sort(lista_datos, sort_criteria_6)
         index_sorted = ar.new_list()
-        print(lista_datos_sorted)
         for j in lista_datos_sorted["elements"]:
             ar.add_last(index_sorted, lp.get(j, "index"))
     
         lista_final = ar.new_list()
         for z in index_sorted["elements"]:
-            ar.add_last(lista_final, ar.get_element(lista_fuente, z))
-            ar.add_last(lista_final, ar.get_element(lista_años_collección, z))
-            ar.add_last(lista_final, ar.get_element(lista_carga, z))
-            ar.add_last(lista_final, ar.get_element(lista_frecuencia, z))
-            ar.add_last(lista_final, ar.get_element(lista_departamento, z))
-            ar.add_last(lista_final, ar.get_element(lista_unidad, z))
-            ar.add_last(lista_final, ar.get_element(lista_producto, z))
+            lista_un_dato = []
+            lista_un_dato.append(ar.get_element(lista_fuente, z))
+            lista_un_dato.append(ar.get_element(lista_años_collección, z))
+            lista_un_dato.append(ar.get_element(lista_carga, z))
+            lista_un_dato.append(ar.get_element(lista_frecuencia, z))
+            lista_un_dato.append(ar.get_element(lista_departamento, z))
+            lista_un_dato.append(ar.get_element(lista_unidad, z))
+            lista_un_dato.append(ar.get_element(lista_producto, z))
+
+            ar.add_last(lista_final, lista_un_dato)
 
     else:
         result = None
@@ -530,7 +532,7 @@ def sort_criteria_6(fecha_1, fecha_2):
     is_sorted = False
     load_time_1 = lp.get(fecha_1, "load_time")
     load_time_2 = lp.get(fecha_2, "load_time")
-    if load_time_1 < load_time_2:
+    if load_time_1 > load_time_2:
         is_sorted = True
     return is_sorted
 
