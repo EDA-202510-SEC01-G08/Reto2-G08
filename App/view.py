@@ -82,6 +82,12 @@ def print_req_2(control):
             print(f"\nNo se encontraron registros para el estado {input_state}.")
 
         else:
+
+            if N > ar.get_element(result[0], 1):
+                print(f"\nEl número de registros que se pueden listar es menor a {N}.")
+                N = ar.get_element(result[0], 1)
+                print(f"\nSe listarán {N} registros.\n")
+                
             headers_generales = ["Tiempo de carga", "Registros que cumplieron el filtro"]
             print(tb.tabulate([result[0]["elements"]], headers_generales, tablefmt="pretty"))
 
