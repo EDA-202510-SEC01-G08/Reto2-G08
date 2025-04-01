@@ -31,6 +31,7 @@ def load_data(control):
     file_path = f"Data/{file}" 
     
     data = lg.load_data(control, file_path)
+    print(data)
     headers_generales = ["Tiempo de carga", "N° de registros", "Año min", "Año max"]
     print(tb.tabulate([data[0]["elements"]], headers_generales, tablefmt="pretty"))    
     print(f"\nLos primeros 5 registros son:\n")
@@ -48,6 +49,7 @@ def print_req_1(control):
     yearss = int(input_year.replace(" ", ""))
 
     result = lg.req_1(control, yearss)
+    print(result)
 
     if result is None:
         print(f"\nNo se encontraron registros para el año {yearss}.")
@@ -67,6 +69,8 @@ def print_req_2(control):
     statesm = statess.upper()
     input_N = input("\nIngrese el número de registros que quiere listar: ")
     N = int(input_N.replace(" ", ""))
+    result = lg.req_2(control, statesm, N)
+    print(result)
 
     if N == 0:
         print("\nEl número de registros no puede ser 0.")
@@ -99,45 +103,31 @@ def print_req_3(control):
         Función que imprime la solución del Requerimiento 3 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 3
-
     año_i = input("\nIngresa el año inicial del filtro: ")
-    año_i = int(año_i.replace(" ", ""))
     año_f = input("\nIngrese el año final del filtro: ")
-    año_f = int(año_f.replace(" ", ""))
-    estado = input("\nIngrese el estado por el cual desea filtrar: ")
+    estado = input("Ingrese el estado por el cual desea filtrar: ")
     estado_1 = estado.replace(" ", "")
     estado_2 = estado_1.upper()
 
-    if año_f > dt.datetime.now().year:
-        print("\nNo se puede viajar en el tiempo.")
-
-    elif año_i > año_f:
-        print("\nEl año inicial no puede ser mayor al año final.")
-
+    result = lg.req_3(control, año_i, año_f, estado_2)
+    if result[1] == None:
+        print(f"\nNo se encontraron registos en el estado {estado_2} entre los años {año_i} - {año_f}")
     else:
+        headers = ["Fuente", "Año de recolección", "Fecha de carga", "Frecuencia de recolección", "Producto", "Unidad de medición"]
 
-        result = lg.req_3(control, año_i, año_f, estado_2)
-
-        if result == None:
-            print(f"\nNo se encontraron registos en el estado {estado_2} entre los años {año_i} - {año_f}")
-            
+        if ar.size(result[1]) <= 20:
+            print(f"\nLos registros tomados en el estado {estado_2} dentro del rango de años {año_i} - {año_f} son:\n")
+            print(tb.tabulate(result[1]["elements"][:-1], headers, tablefmt="pretty"))
+            print("\nEl número de registros que cumplen el filtro y tienen como fuente 'survey' son: " + str(result[0]["elements"][2]))
+            print("El número de registros que cumplen el filtro y tienen como fuente 'census' son: " + str(result[0]["elements"][3]))
+            print("El total de registros que cumplen el filtro son: " + str(result[0]["elements"][1]))
+            print("El tiempo que tarda el requerimiento en realizarse es: " + str(result[0]["elements"][0]))
         else:
-            headers = ["Fuente", "Año de recolección", "Fecha de carga", "Frecuencia de recolección", "Producto", "Unidad de medición"]
-            headers1 = ["Tiempo de carga", "Registros que cumplieron el filtro", "Registros con fuente 'SURVEY' ", "Registros con fuente 'CENSUS' "]
-            print(tb.tabulate([result[0]["elements"]], headers1, tablefmt="pretty"))
-
-            if ar.size(result[1]) <= 20:
-
-                print(f"\nLos registros tomados en el estado {estado_2.capitalize()} dentro del rango de años {año_i} - {año_f} son:\n")
-                print(tb.tabulate(result[1]["elements"], headers, tablefmt="pretty"))
-
-            else:
-                primeros_5 = ar.sub_list(result[1], 0, 5)
-                ultimos_5 = ar.sub_list(result[1], ar.size(result[1])-5, 5)
-                print(f"\nLos primeros 5 registros tomados en el estado {estado_2} dentro del rango de años {año_i} - {año_f} son:\n")
-                print(tb.tabulate(primeros_5["elements"], headers, tablefmt="pretty"))
-                print(f"\nLos últimos 5 registros tomados en el estado {estado_2} dentro del rango de años {año_i} - {año_f} son:\n")
-                print(tb.tabulate(ultimos_5["elements"], headers, tablefmt="pretty"))
+            print(f"\nLos últimos 5 registros y los primers registros (respectivamente) que fueron tomados en el estado {estado_2} dentro del rango de años {año_i} - {año_f} son")
+            print(tb.tabulate(result[1]["elements"][:-1], headers, tablefmt="pretty"))
+            print("\nEl número de registros que cumplen el filtro y tienen como fuente 'survey' son: " + str(result[0]["elements"][2]))
+            print("El número de registros que cumplen el filtro y tienen como fuente 'census' son: " + str(result[0]["elements"][3]))
+            print("El total de registros que cumplen el filtro son: " + str(result[0]["elements"][1]))
 
 
 def print_req_4(control):
@@ -237,29 +227,26 @@ def print_req_6(control):
     """
     # TODO: Imprimir el resultado del requerimiento 6
     fecha_i = input("\nIngresa la fecha inicial del filtro en el fromato YYYY-MM-DD: ")
-    fecha_i = fecha_i.replace(" ", "")
     fecha_f = input("\nIngrese la fecha final del filtro en el fromato YYYY-MM-DD: ")
-    fecha_f = fecha_f.replace(" ", "")
     estado = input("\nIngrese el estado por el cual desea filtrar: ")
     estado_1 = estado.replace(" ", "")
     estado_2 = estado_1.upper()
 
     result = lg.req6(control, estado_2, fecha_i, fecha_f)
-
     if result == None:
-        print(f"\nNo se encontraron registos en el estado {estado} entre los años {fecha_i} - {fecha_f}")
+        print(f"\nNo se encontraron registos en el estado {estado_2} entre los años {fecha_i} - {fecha_f}")
     else:
         headers = ["Fuente", "Año de recolección", "Fecha de carga", "Frecuencia de recolección", "Estado", "Unidad de medición", "Producto"]
 
         if ar.size(result) <= 20:
-            print(f"\nLos registros tomados en el estado {estado_2.capitalize()} dentro del rango de años {fecha_i} - {fecha_f} son:\n")
+            print(f"\nLos registros tomados en el estado {estado_2} dentro del rango de años {fecha_i} - {fecha_f} son:\n")
             print(tb.tabulate(result["elements"][:-1], headers, tablefmt="pretty"))
             print("\nEl número de registros que cumplen el filtro y tienen como fuente 'survey' son: " + str(result["elements"][-1][1]))
             print("El número de registros que cumplen el filtro y tienen como fuente 'census' son: " + str(result["elements"][-1][2]))
             print("El total de registros que cumplen el filtro son: " + str(result["elements"][-1][0]))
 
         else:
-            print(f"\nLos últimos 5 registros y los primers registros (respectivamente) que fueron tomados en el estado {estado_2} dentro del rango de años {fecha_i} - {fecha_f} son")
+            print(f"\nLos últimos 5 registros y los primeros 5 registros (respectivamente) que fueron tomados en el estado {estado_2} dentro del rango de años {fecha_i} - {fecha_f} son: ")
             print(tb.tabulate(result["elements"][:-1], headers, tablefmt="pretty"))
             print("\nEl número de registros que cumplen el filtro y tienen como fuente 'survey' son: " + str(result["elements"][-1][1]))
             print("El número de registros que cumplen el filtro y tienen como fuente 'census' son: " + str(result["elements"][-1][2]))
