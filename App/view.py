@@ -31,7 +31,6 @@ def load_data(control):
     file_path = f"Data/{file}" 
     
     data = lg.load_data(control, file_path)
-    print(data)
     headers_generales = ["Tiempo de carga", "N° de registros", "Año min", "Año max"]
     print(tb.tabulate([data[0]["elements"]], headers_generales, tablefmt="pretty"))    
     print(f"\nLos primeros 5 registros son:\n")
@@ -49,7 +48,6 @@ def print_req_1(control):
     yearss = int(input_year.replace(" ", ""))
 
     result = lg.req_1(control, yearss)
-    print(result)
 
     if result is None:
         print(f"\nNo se encontraron registros para el año {yearss}.")
@@ -70,7 +68,6 @@ def print_req_2(control):
     input_N = input("\nIngrese el número de registros que quiere listar: ")
     N = int(input_N.replace(" ", ""))
     result = lg.req_2(control, statesm, N)
-    print(result)
 
     if N == 0:
         print("\nEl número de registros no puede ser 0.")
@@ -266,7 +263,7 @@ def print_req_7(control):
     """
     # TODO: Imprimir el resultado del requerimiento 7
     
-    departamento = input("\nIngrese el departamento a consultar: ").strip().upper()
+    departamento = input("\nIngrese el estado a consultar: ").strip().upper()
     anio_inicio = int(input("\nIngrese el año inicial a consultar: ").strip())
     anio_fin = int(input("\nIngrese el año final a consultar: ").strip())
     orden = input("\nIngrese el orden (ASCENDENTE o DESCENDENTE): ").strip().upper()
@@ -281,28 +278,62 @@ def print_req_7(control):
 
     result = lg.req_7(control, departamento, anio_inicio, anio_fin, orden)
 
-    if result is None or ar.size(result[1]) == 0:
+    if result is None:
         print(f"\nNo se encontraron registros para el departamento {departamento} en el rango de años {anio_inicio} - {anio_fin}.")
         return
 
-    headers_generales = ["Tiempo de ejecución", "Registros válidos"]
-    print("\nResultados generales:")
+    headers_generales = ["Tiempo de ejecución", "Registros válidos", "Registros inválidos", "Registros con fuente 'SURVEY'", "Registros con fuente 'CENSUS'"]
     print(tb.tabulate([result[0]["elements"]], headers_generales, tablefmt="pretty"))
 
-    headers = ["Año", "Ingresos", "Registros", "Mayor/Menor", "Registros inválidos", "Survey", "Census"]
+    if orden == "ASCENDENTE":
+        extremo_1 = result[2]["elements"]
+        headers_extremos = ["Año", "Ingresos", "Registros", "Mayor / Menor"]
+        print(f"\nEl registro con el mayor ingreso en el departamento {departamento} en el rango de años {anio_inicio} - {anio_fin} es:\n")
+        print(tb.tabulate([extremo_1], headers_extremos, tablefmt="pretty"))
 
-    if ar.size(result[1]) > 15:
-        primeros_5 = ar.sub_list(result[1], 0, 5)
-        ultimos_5 = ar.sub_list(result[1], ar.size(result[1]) - 5, 5)
+        headers = ["Año", "Ingresos", "Registros"]
 
-        print(f"\nLos primeros 5 registros del departamento {departamento} en el rango de años {anio_inicio} - {anio_fin} son:\n")
-        print(tb.tabulate(primeros_5["elements"], headers, tablefmt="pretty"))
+        if ar.size(result[1]) > 15:
+            primeros_5 = ar.sub_list(result[1], 0, 5)
+            ultimos_5 = ar.sub_list(result[1], ar.size(result[1]) - 5, 5)
 
-        print(f"\nLos últimos 5 registros del departamento {departamento} en el rango de años {anio_inicio} - {anio_fin} son:\n")
-        print(tb.tabulate(ultimos_5["elements"], headers, tablefmt="pretty"))
+            print(f"\nLos primeros 5 registros del departamento {departamento} en el rango de años {anio_inicio} - {anio_fin} son:\n")
+            print(tb.tabulate(primeros_5["elements"], headers, tablefmt="pretty"))
+
+            print(f"\nLos últimos 5 registros del departamento {departamento} en el rango de años {anio_inicio} - {anio_fin} son:\n")
+            print(tb.tabulate(ultimos_5["elements"], headers, tablefmt="pretty"))
+        else:
+            print(f"\nLos registros del departamento {departamento} en el rango de años {anio_inicio} - {anio_fin} son:\n")
+            print(tb.tabulate(result[1]["elements"], headers, tablefmt="pretty"))
+
+        extremo_2 = result[3]["elements"]
+        print(f"\nEl registro con el menor ingreso en el departamento {departamento} en el rango de años {anio_inicio} - {anio_fin} es:\n")
+        print(tb.tabulate([extremo_2], headers_extremos, tablefmt="pretty"))
+    
     else:
-        print(f"\nLos registros del departamento {departamento} en el rango de años {anio_inicio} - {anio_fin} son:\n")
-        print(tb.tabulate(result[1]["elements"], headers, tablefmt="pretty"))
+        extremo_1 = result[2]["elements"]
+        headers_extremos = ["Año", "Ingresos", "Registros", "Mayor / Menor"]
+        print(f"\nEl registro con el menor ingreso en el departamento {departamento} en el rango de años {anio_inicio} - {anio_fin} es:\n")
+        print(tb.tabulate([extremo_1], headers_extremos, tablefmt="pretty"))
+
+        headers = ["Año", "Ingresos", "Registros"]
+
+        if ar.size(result[1]) > 15:
+            primeros_5 = ar.sub_list(result[1], 0, 5)
+            ultimos_5 = ar.sub_list(result[1], ar.size(result[1]) - 5, 5)
+
+            print(f"\nLos primeros 5 registros del departamento {departamento} en el rango de años {anio_inicio} - {anio_fin} son:\n")
+            print(tb.tabulate(primeros_5["elements"], headers, tablefmt="pretty"))
+
+            print(f"\nLos últimos 5 registros del departamento {departamento} en el rango de años {anio_inicio} - {anio_fin} son:\n")
+            print(tb.tabulate(ultimos_5["elements"], headers, tablefmt="pretty"))
+        else:
+            print(f"\nLos registros del departamento {departamento} en el rango de años {anio_inicio} - {anio_fin} son:\n")
+            print(tb.tabulate(result[1]["elements"], headers, tablefmt="pretty"))
+
+        extremo_2 = result[3]["elements"]
+        print(f"\nEl registro con el mayor ingreso en el departamento {departamento} en el rango de años {anio_inicio} - {anio_fin} es:\n")
+        print(tb.tabulate([extremo_2], headers_extremos, tablefmt="pretty"))
 
 
 def print_req_8(control):
