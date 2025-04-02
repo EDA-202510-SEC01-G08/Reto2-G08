@@ -557,170 +557,98 @@ def req_7(catalog, departamento, anio_inicio, anio_fin, orden):
     Retorna el resultado del requerimiento 7
     """
     # TODO: Modificar el requerimiento 7
-    """"start_time = get_time()
-    
-    registros = ar.new_list()
-
-    mapa_years = lp.new_map(anio_fin-anio_inicio, 0.5)
-
-    index= 0
-    total_survey = 0
-    total_census = 0
-    registros_validos = 0
-    registros_invalidos = 0
-    
-    list_categorias = lp.get(catalog, "statical_category")
-    list_anios = lp.get(catalog, "year_collection")
-    list_fuentes = lp.get(catalog, "source")
-    list_tiempos_carga = lp.get(catalog, "load_time")
-    lits_frecuencias = lp.get(catalog, "freq_collection")
-    lits_estados = lp.get(catalog, "state_name")
-    lits_unidades = lp.get(catalog, "unit_measurement")
-    lits_productos = lp.get(catalog, "commodity")
-    
-    for estado in lits_estados["elements"]:
-        estado = estado.replace(" ", "").upper()
-        anio_actual = int(ar.get_element(list_anios,index)).replace(" ", "").upper()
-        unidad = ar.get_element(lits_unidades,index).replace(" ", "")
-        valor = ar.get_element(lits_productos,index).replace(" ", "")
-
-        if estado == departamento and anio_inicio <= anio_actual <= anio_fin and "$" in unidad:
-            if lp.contains(mapa_years, anio_actual) is False:
-                lp.put(mapa_years, anio_actual, 0)
-            lp.get(mapa_years, anio_actual) += valor 
-            registros_validos += 1
-        if "(" in unidad:
-            registros_invalidos +=1
-        elif ar.get_element(list_fuentes,index) == "SURVEY":
-            total_survey += 1
-        elif ar.get_element(list_fuentes,index) == "CENSUS":
-            total_census += 1
-
-            """""
-
-    """
-    Retorna el resultado del requerimiento 7.
-    Filtra los registros por departamento y rango de años, y los ordena por ingresos.
-    """
-
-    # Iniciar conteo de tiempo de ejecución
     start_time = get_time()
 
-    # Crear un mapa para almacenar la información de ingresos por año
-    mapa_years = lp.new_map(anio_fin - anio_inicio , 0.5)
+    # crear un mapa para almacenar la información de ingresos por año
+    mapa_years = lp.new_map(anio_fin - anio_inicio + 1, 0.5)
 
-    # Contadores para estadísticas finales
     registros_validos = 0
     registros_invalidos = 0
     total_survey = 0
     total_census = 0
 
-    # Obtener listas del catálogo
     list_anios = lp.get(catalog, "year_collection")
     list_fuentes = lp.get(catalog, "source")
     list_estados = lp.get(catalog, "state_name")
     list_unidades = lp.get(catalog, "unit_measurement")
     list_valores = lp.get(catalog, "value")
 
-    # Recorrer la lista de estados para filtrar los registros
     for i in range(ar.size(list_estados)):
-        estado = ar.get_element(list_estados, i)  # Obtener el nombre del estado
-        anio_actual = ar.get_element(list_anios, i)  # Obtener el año de recolección
-        unidad = ar.get_element(list_unidades, i)  # Obtener la unidad de medida
-        valor = ar.get_element(list_valores, i)  # Obtener el valor de ingreso
+        estado = ar.get_element(list_estados, i).replace(" ", "").upper()
+        anio_actual = int(ar.get_element(list_anios, i).replace(" ", ""))
+        unidad = ar.get_element(list_unidades, i).replace(" ", "")
+        valor = ar.get_element(list_valores, i).replace(" ", "")
 
-        # Convertir el año a entero para comparaciones
-        anio_actual = int(anio_actual)
-
-        # Filtrar los registros según el departamento, año y unidad de medida en dólares
         if estado == departamento and anio_inicio <= anio_actual <= anio_fin and "$" in unidad:
-            
-            # Verificar si el valor de ingreso es válido (descartar si tiene caracteres como '()')
             if "(" in valor or valor == "":
                 registros_invalidos += 1
             else:
-                # Si el año no está en el mapa, se inicializa
+                # si el año no está en el mapa, se inicializa
                 if not lp.contains(mapa_years, anio_actual):
-                    datos_anio = lp.new_map(2, 0.5)
-                    lp.put(datos_anio, "value", 0)  # Inicializar ingreso en 0
-                    lp.put(datos_anio, "num_registros", 0)  # Inicializar cantidad de registros en 0
-                    lp.put(mapa_years, anio_actual, datos_anio)  # Agregar al mapa principal
-                
-                # Obtener el mapa de datos del año actual
+                    lp.put(mapa_years, anio_actual, {"ingresos": 0, "registros": 0, "año": anio_actual})
+
+                # obtener el diccionario del año actual
                 datos_anio = lp.get(mapa_years, anio_actual)
 
-                # Obtener los valores actuales de ingresos y cantidad de registros
-                ingreso_actual = lp.get(datos_anio, "value")
-                cantidad_actual = lp.get(datos_anio, "num_registros")
+                # actualizar los valores de ingresos y registros
+                datos_anio["ingresos"] += float(valor)
+                datos_anio["registros"] += 1
 
-                # Sumar el nuevo valor de ingreso y aumentar el contador de registros
-                lp.put(datos_anio, "value", ingreso_actual + float(valor))
-                lp.put(datos_anio, "num_registros", cantidad_actual + 1)
+                registros_validos += 1
 
-                registros_validos += 1  # Aumentar el contador de registros válidos
-
-        # Contabilizar registros según la fuente de origen
-        fuente = ar.get_element(list_fuentes, i)
+        fuente = ar.get_element(list_fuentes, i).replace(" ", "").upper()
         if fuente == "SURVEY":
             total_survey += 1
         elif fuente == "CENSUS":
             total_census += 1
 
-    # Aplicar la función de ordenamiento usando merge sort
-    sorted_years = ar.merge_sort(mapa_years, sort_criteria_7)
+    # se conveierten los valores del mapa a una lista
+    lista_datos = list(lp.value_set(mapa_years))
 
-    # Si el usuario quiere en orden ascendente, se invierte la lista
-    # Se infiere que si es "DESCENDENTE" no se invierte sino se deja normal
+    lista_ordenada = ar.merge_sort(lista_datos, sort_criteria_7)
+
+    # si el orden es ascendente, invertir la lista
     if orden == "ASCENDENTE":
-        sorted_years = sorted_years[::-1]
+        lista_ordenada = lista_ordenada[::-1]
+    else: #si la lista es descendente, no se hace nada
+        lista_ordenada = lista_ordenada[:]
 
-    # Determinar los años con mayor y menor ingreso según el orden solicitado
-    if ar.size(sorted_years) > 0:
-        if orden == "ASCENDENTE":
-            menor_ingreso = ar.get_element(sorted_years, 0)  # Primer año en la lista
-            mayor_ingreso = ar.get_element(sorted_years, ar.size(sorted_years) - 1)  # Último año
+    # determinar el mayor y menor ingreso según el orden solicitado
+    if lista_ordenada:
+        if orden == "DESCENDENTE":
+            lista_ordenada[0]["may_men"] = "MAYOR"
+            lista_ordenada[-1]["may_men"] = "MENOR"
         else:
-            mayor_ingreso = ar.get_element(sorted_years, 0)  # Primer año en la lista
-            menor_ingreso = ar.get_element(sorted_years, ar.size(sorted_years) - 1)  # Último año
-    else:
-        mayor_ingreso = None
-        menor_ingreso = None
+            lista_ordenada[0]["may_men"] = "MENOR"
+            lista_ordenada[-1]["may_men"] = "MAYOR"
 
-    # Medir el tiempo de ejecución
+    # crear una nueva lista para almacenar los registros actualizados y finales
+    lista_final = ar.new_list()
+
+    # agregar información final a cada registro
+    for registro in lista_ordenada:
+        nuevo_registro = registro.copy()  # copiar el registro para no modificar el original
+        nuevo_registro["invalidos"] = registros_invalidos
+        nuevo_registro["survey"] = total_survey
+        nuevo_registro["census"] = total_census
+        ar.add_last(lista_final, nuevo_registro)
+
     end_time = get_time()
-    delta = str(round(delta_time(start_time, end_time) ,2)) + " ms"
+    delta = str(round(delta_time(start_time, end_time), 2)) + " ms"
 
-    # Retornar los resultados en orden
-    # el return no se como hacerlo con listas tocaria cambiar algunas cosas
-    return delta,registros_validos ,registros_invalidos, sorted_years, mayor_ingreso, menor_ingreso, registros_validos, registros_invalidos, total_survey, total_census
+    resultados_generales = ar.new_list()
+    ar.add_last(resultados_generales, delta)
+
+    return resultados_generales, lista_final
 
 
 def sort_criteria_7(anio1, anio2):
-    """
-    Compara dos años para ordenarlos primero por ingresos y, en caso de empate,
-    por el número de registros de manera descendente.
-    """
-
-    # Obtener los datos de los años del mapa `mapa_years`  
-    datos_anio1 = lp.get(mapa_years, anio1) #no se como meter el mapa principal aqui
-    datos_anio2 = lp.get(mapa_years, anio2)
-
-    # Acceder a los valores de "value" (ingresos) y "num_registros" (número de registros)
-    ingresos1 = lp.get(datos_anio1, "value")
-    ingresos2 = lp.get(datos_anio2, "value")
-    registros1 = lp.get(datos_anio1, "num_registros")
-    registros2 = lp.get(datos_anio2, "num_registros")
-
-    # Comparar por ingresos
-    if ingresos1 < ingresos2:
+    if anio1["ingresos"] > anio2["ingresos"]:
         return True
-    elif ingresos1 == ingresos2:
-        # Si los ingresos son iguales, ordenar por número de registros (de manera descendente)
-        return registros1 > registros2
+    elif anio1["ingresos"] == anio2["ingresos"]:
+        return anio1["registros"] > anio2["registros"]
     else:
         return False
-    
-        
         
 
 

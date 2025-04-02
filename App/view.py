@@ -265,7 +265,44 @@ def print_req_7(control):
         Función que imprime la solución del Requerimiento 7 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 7
-    pass
+    
+    departamento = input("\nIngrese el departamento a consultar: ").strip().upper()
+    anio_inicio = int(input("\nIngrese el año inicial a consultar: ").strip())
+    anio_fin = int(input("\nIngrese el año final a consultar: ").strip())
+    orden = input("\nIngrese el orden (ASCENDENTE o DESCENDENTE): ").strip().upper()
+
+    if anio_fin > dt.datetime.now().year:
+        print("\nNo se puede viajar en el tiempo.")
+        return
+
+    if anio_inicio > anio_fin:
+        print("\nEl año inicial no puede ser mayor al año final.")
+        return
+
+    result = lg.req_7(control, departamento, anio_inicio, anio_fin, orden)
+
+    if result is None or ar.size(result[1]) == 0:
+        print(f"\nNo se encontraron registros para el departamento {departamento} en el rango de años {anio_inicio} - {anio_fin}.")
+        return
+
+    headers_generales = ["Tiempo de ejecución", "Registros válidos"]
+    print("\nResultados generales:")
+    print(tb.tabulate([result[0]["elements"]], headers_generales, tablefmt="pretty"))
+
+    headers = ["Año", "Ingresos", "Registros", "Mayor/Menor", "Registros inválidos", "Survey", "Census"]
+
+    if ar.size(result[1]) > 15:
+        primeros_5 = ar.sub_list(result[1], 0, 5)
+        ultimos_5 = ar.sub_list(result[1], ar.size(result[1]) - 5, 5)
+
+        print(f"\nLos primeros 5 registros del departamento {departamento} en el rango de años {anio_inicio} - {anio_fin} son:\n")
+        print(tb.tabulate(primeros_5["elements"], headers, tablefmt="pretty"))
+
+        print(f"\nLos últimos 5 registros del departamento {departamento} en el rango de años {anio_inicio} - {anio_fin} son:\n")
+        print(tb.tabulate(ultimos_5["elements"], headers, tablefmt="pretty"))
+    else:
+        print(f"\nLos registros del departamento {departamento} en el rango de años {anio_inicio} - {anio_fin} son:\n")
+        print(tb.tabulate(result[1]["elements"], headers, tablefmt="pretty"))
 
 
 def print_req_8(control):
